@@ -1,0 +1,63 @@
+{
+  "name": "scany",
+  "version": "0.0.1",
+  "description": "copy pasta",
+  "main": "index.js",
+  "scripts": {
+    "clean": "gulp clean",
+    "rebuild": "gulp build",
+    "watch": "gulp watch",
+    "test": "gulp test",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "preversion": "npm test",
+    "version": "git add -A",
+    "postversion": "git push && git push --tags && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JimmyBoh/scany.git"
+  },
+  "author": "Jim Buck <jim@jimmyboh.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JimmyBoh/scany/issues"
+  },
+  "homepage": "https://github.com/JimmyBoh/scany#readme",
+  "devDependencies": {
+    "@types/cheerio": "^0.17.31",
+    "@types/node": "^6.0.46",
+    "@types/request": "0.0.33",
+    "ava": "^0.16.0",
+    "coveralls": "^2.11.14",
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-shell": "^0.5.2",
+    "nyc": "^8.4.0",
+    "typescript": "^2.0.8",
+    "yargs": "^6.3.0"
+  },
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "feedparser": "^1.1.5",
+    "lodash.get": "^4.4.2",
+    "request": "^2.78.0",
+    "url-pattern": "^1.0.2"
+  },
+  "ava": {
+    "files": [
+      "./dist/**/*.spec.js"
+    ],
+    "source": [
+      "./dist/**/*.js"
+    ]
+  },
+  "nyc": {
+    "include": [
+      "dist/**/*.js"
+    ],
+    "exclude": [
+      "dist/**/*.spec.js",
+      "dist/debug.js"
+    ]
+  }
+}
