@@ -1,7 +1,7 @@
 {
   "name": "scany",
   "version": "0.1.0",
-  "description": "copy pasta",
+  "description": "Easily grab recent video data from user, channel, and playlist URLs!",
   "main": "index.js",
   "scripts": {
     "clean": "gulp clean",

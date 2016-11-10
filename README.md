@@ -1,5 +1,4 @@
 # scany
-Easily grab recent video data from user, channel, and playlist URLs!
 
 [![Build Status](https://travis-ci.org/JimmyBoh/scany.svg?branch=master)](https://travis-ci.org/JimmyBoh/scany)
 [![Coverage Status](https://coveralls.io/repos/github/JimmyBoh/scany/badge.svg?branch=master)](https://coveralls.io/github/JimmyBoh/scany?branch=master)
@@ -10,7 +9,7 @@ YouTube provides basic information on users, channels, and playlists via RSS fee
 
 ## Example:
 
-Node:
+### Node:
 
 ```ts
 import { Scany } from './index';
@@ -26,7 +25,7 @@ Promise.all([
 });
 ```
 
-CLI:
+### CLI:
 _Coming Soon!_
 
 See `src/models.ts` and `src/debug.ts` for model details and further examples.
