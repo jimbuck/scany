@@ -7,12 +7,16 @@
 YouTube provides basic information on users, channels, and playlists via RSS feeds. This module makes it incredibly easy to access that data without requiring an API key! Not having to sign up for something new is great for hackathons and small projects. If more information is required, then the official YouTube API is recommended.
 
 
+## Installation:
+
+```bash
+npm i --save scany
+```
+
 ## Example:
 
-### Node:
-
 ```ts
-import { Scany } from './index';
+import { Scany } from 'scany';
 
 const scany = new Scany();
 
@@ -25,22 +29,21 @@ Promise.all([
 });
 ```
 
-### CLI:
-_Coming Soon!_
-
 See `src/models.ts` and `src/debug.ts` for model details and further examples.
 
 ## Features:
  - No configuration necessary!
- - Automatically converts YouTube URLs into thier feed equivalents.
+ - Automatically converts YouTube URLs into their feed equivalents.
  - Lightweight API, no OAuth key needed!
- - Free CLI command (pipe in, pipe out) _coming soon!_
 
 ## Caveats/Warnings:
  - Only loads a maximum of 15 videos at a time. This is a "recent videos" API not a "list videos" API.
  - Video duration is not present in the YouTube RSS feeds at this time.
  - Don't spam these commands, one endpoint only needs to be fetched every few hours at most (24 hours should be sufficient for most applications).
 
+## Related
+
+Use [`pully`](https://github.com/jimmyboh/pully) to easily download a retrieved videos.
  
 ## Contribute
  
