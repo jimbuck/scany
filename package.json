@@ -26,7 +26,6 @@
   "devDependencies": {
     "@types/cheerio": "^0.17.31",
     "@types/node": "^6.0.46",
-    "@types/request": "0.0.33",
     "ava": "^0.16.0",
     "coveralls": "^2.11.14",
     "del": "^2.2.2",
@@ -39,8 +38,8 @@
   "dependencies": {
     "cheerio": "^0.22.0",
     "feedparser": "^1.1.5",
+    "got": "^6.6.3",
     "lodash.get": "^4.4.2",
-    "request": "^2.78.0",
     "url-pattern": "^1.0.2"
   },
   "ava": {

@@ -1,9 +1,9 @@
 import { IncomingMessage } from 'http';
 import { parse } from 'url';
 
-import * as request from 'request';
 import * as cheerio from 'cheerio';
 import * as UrlPattern from 'url-pattern';
+const got = require('got');
 const FeedParser = require('feedparser');
 const get: (<T>(item: any, path: string) => any) = require('lodash.get');
 
@@ -66,7 +66,7 @@ export class Scany {
   private _downloadFeedData(url: string): Promise<ScanResult> {
     return new Promise((resolve, reject) => {
       let result: ScanResult = { videos: [] };
-      request.get(url)
+      got.stream(url)
         .on('error', reject)
         .pipe(new FeedParser())
         .on('error', reject)
