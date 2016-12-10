@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "description": "Easily grab recent video data from user, channel, and playlist URLs!",
   "main": "index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "clean": "gulp clean",
     "rebuild": "gulp build",
