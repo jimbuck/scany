@@ -27,12 +27,12 @@
   "devDependencies": {
     "@types/cheerio": "^0.17.31",
     "@types/node": "^6.0.46",
-    "ava": "^0.16.0",
+    "ava": "^0.17.0",
     "coveralls": "^2.11.14",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-shell": "^0.5.2",
-    "nyc": "^8.4.0",
+    "nyc": "^10.0.0",
     "typescript": "^2.0.8",
     "yargs": "^6.3.0"
   },
