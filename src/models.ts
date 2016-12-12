@@ -7,14 +7,14 @@ export interface ScanResult {
   title?: string;
   author?: string;
   link?: string;
-  videos?: Array<Video>;
+  videos?: Array<VideoData>;
 }
 
-export interface Video {
+export interface VideoData {
   title: string;
   description: string;
   id: string;
-  link: string;
+  url: string;
   published: Date;
   thumbnails: Thumbnails;
   views: number;

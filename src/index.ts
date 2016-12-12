@@ -7,14 +7,14 @@ const got = require('got');
 const FeedParser = require('feedparser');
 const get: (<T>(item: any, path: string) => any) = require('lodash.get');
 
-import { Options, ScanResult, Video, Thumbnails, parseThumbnails } from './models';
+import { Options, ScanResult, VideoData, Thumbnails, parseThumbnails } from './models';
 
 const userPattern = new UrlPattern('/user/:username');
 const channelPattern = new UrlPattern('/channel/:channelId');
 const playlistPattern = new UrlPattern('/playlist');
 const feedPattern = new UrlPattern('/feeds/videos.xml');
 
-export { Options, ScanResult, Video, Thumbnails };
+export { Options, ScanResult, VideoData, Thumbnails };
 
 export class Scany {
 
@@ -83,7 +83,7 @@ export class Scany {
               title: item.title,
               description: get(item, 'media:group.media:description.#'),
               id: videoId,
-              link: item.link,
+              url: item.link,
               published: item.pubDate,
               thumbnails: parseThumbnails(videoId),
               views: parseInt(get(item, 'media:group.media:community.media:statistics.@.views'), 10),

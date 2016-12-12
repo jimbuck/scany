@@ -47,7 +47,8 @@ See `src/models.ts` and `src/debug.ts` for model details and further examples.
 
 ## Related
 
-Use [`pully`](https://github.com/jimmyboh/pully) to easily download a retrieved videos.
+ - Use [`pully`](https://github.com/jimmyboh/pully) to easily download a retrieved videos.
+ - Check out [`pully-server`](https://github.com/jimmyboh/pully-server) for a complete solution to set up an auto-download system.
  
 ## Contribute
  

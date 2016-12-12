@@ -1,4 +1,4 @@
-import { ScanResult, Video } from './models';
+import { ScanResult } from './models';
 
 import { Scany } from './index';
 

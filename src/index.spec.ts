@@ -80,7 +80,7 @@ perInput(`fetch creates usable data`, async (t, input) => {
     result.videos.forEach(video => {
         t.is(typeof video.title, 'string');
         //t.is(typeof video.description, 'string');
-        t.is(typeof video.link, 'string');
+        t.is(typeof video.url, 'string');
         t.true(video.published instanceof Date);
         t.is(typeof video.id, 'string');
         t.is(typeof video.rating, 'number');
