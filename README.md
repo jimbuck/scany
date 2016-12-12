@@ -1,8 +1,12 @@
 # scany
 
-[![Build Status](https://travis-ci.org/JimmyBoh/scany.svg?branch=master)](https://travis-ci.org/JimmyBoh/scany)
-[![Coverage Status](https://coveralls.io/repos/github/JimmyBoh/scany/badge.svg?branch=master)](https://coveralls.io/github/JimmyBoh/scany?branch=master)
-[![NPM Dependencies](https://david-dm.org/JimmyBoh/scany.svg)](https://david-dm.org/JimmyBoh/scany)
+[![Build Status](https://img.shields.io/travis/JimmyBoh/scany/master.svg?style=flat-square)](https://travis-ci.org/JimmyBoh/scany)
+[![Code Coverage](https://img.shields.io/coveralls/JimmyBoh/scany/master.svg?style=flat-square)](https://coveralls.io/github/JimmyBoh/scany?branch=master)
+[![Dependencies](https://img.shields.io/david/JimmyBoh/scany.svg?style=flat-square)](https://david-dm.org/JimmyBoh/scany)
+[![DevDependencies](https://img.shields.io/david/dev/JimmyBoh/scany.svg?style=flat-square)](https://david-dm.org/JimmyBoh/scany?type=dev)
+[![npm](https://img.shields.io/npm/v/scany.svg?style=flat-square)](https://www.npmjs.com/package/scany)
+[![Monthly Downloads](https://img.shields.io/npm/dm/scany.svg?style=flat-square)](https://www.npmjs.com/package/scany)
+[![Total Downloads](https://img.shields.io/npm/dt/scany.svg?style=flat-square)](https://www.npmjs.com/package/scany)
 
 YouTube provides basic information on users, channels, and playlists via RSS feeds. This module makes it incredibly easy to access that data without requiring an API key! Not having to sign up for something new is great for hackathons and small projects. If more information is required, then the official YouTube API is recommended.
 
