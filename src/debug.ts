@@ -18,7 +18,7 @@ let p = Promise.resolve();
 p.then(() => console.log('Done!'));
 
 function printResult(result: ScanResult) {
-  console.log(`┌ ${result.title} by ${result.author} (${result.videos.length} videos)`);
+  console.log(`┌ ${result.playlist} by ${result.author} (${result.videos.length} videos)`);
   result.videos.forEach((video, i) => {
     const blockChar = i === result.videos.length - 1 ? '└' : '├';
     console.log(`${blockChar}── ${video.title} [${getStarRating(video.rating)}]`);

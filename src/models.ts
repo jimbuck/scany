@@ -1,12 +1,12 @@
 
-export interface Options {
+export interface ScanyOptions {
   baseFeedUrl?: string;
 }
 
 export interface ScanResult {
-  title?: string;
+  playlist?: string;
   author?: string;
-  link?: string;
+  feed?: string;
   videos?: Array<VideoData>;
 }
 
@@ -19,6 +19,12 @@ export interface VideoData {
   thumbnails: Thumbnails;
   views: number;
   rating: number;
+}
+
+export interface FlatVideoData extends VideoData {
+  author?: string;
+  playlist?: string;
+  feed?: string;
 }
 
 export interface Thumbnails {

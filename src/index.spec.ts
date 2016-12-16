@@ -73,13 +73,39 @@ perInput(`fetch creates usable data`, async (t, input) => {
     const result = await scany.fetch(input);
 
     t.is(typeof result.author, 'string');
-    t.is(typeof result.title, 'string');
-    t.is(typeof result.link, 'string');
+    t.is(typeof result.playlist, 'string');
+    t.is(typeof result.feed, 'string');
     t.true(Array.isArray(result.videos));
 
     result.videos.forEach(video => {
         t.is(typeof video.title, 'string');
-        //t.is(typeof video.description, 'string');
+        t.is(typeof video.description, 'string');
+        t.is(typeof video.url, 'string');
+        t.true(video.published instanceof Date);
+        t.is(typeof video.id, 'string');
+        t.is(typeof video.rating, 'number');
+        t.is(typeof video.views, 'number');
+
+        t.not(typeof video.thumbnails, 'undefined');
+
+        // Just check for one, since all of them are covered by other tests.        
+        t.is(typeof video.thumbnails.high, 'string');
+    });
+}, feeds);
+
+perInput(`fetchFlat creates flat data`, async (t, input) => {
+    const scany = new Scany();
+
+    const result = await scany.fetchFlat(input);
+
+    t.true(Array.isArray(result));
+
+    result.forEach(video => {
+        t.is(typeof video.author, 'string');
+        t.is(typeof video.playlist, 'string');
+        t.is(typeof video.feed, 'string');
+        t.is(typeof video.title, 'string');
+        t.is(typeof video.description, 'string');
         t.is(typeof video.url, 'string');
         t.true(video.published instanceof Date);
         t.is(typeof video.id, 'string');
