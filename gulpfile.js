@@ -56,27 +56,27 @@ bump:patch - Upgrades the package's patch version.
 }
 
 // Drop the dist folder...
-gulp.task('clean', Tasks.clean);
+gulp.task('clean', gulp.series([Tasks.clean]));
 
 // Build with cleaning...
-gulp.task('build', ['clean'], Tasks.buildSrc);
+gulp.task('build', gulp.series(['clean', Tasks.buildSrc]));
 
 // Run the basic `npm test` command after a quick build...
-gulp.task('test', ['build'], Tasks.test);
+gulp.task('test', gulp.series(['build', Tasks.test]));
 
 // Run tests, generate the HTML coverage report and open the browser.
-gulp.task('coverage', ['build'], Tasks.coverage);
+gulp.task('coverage', gulp.series(['build', Tasks.coverage]));
 
 // Used for better development (watch with TAP output) (but also because we now are moving more files around)
-gulp.task('watch', ['build'], Tasks.watch);
+gulp.task('watch', gulp.series(['build', Tasks.watch]));
 
 // Set up the git version helpers...
 ['patch', 'minor', 'major'].forEach(step => {
-  gulp.task('bump:' + step, Tasks.bump(step));
+  gulp.task('bump:' + step, gulp.series([Tasks.bump(step)]));
 });
 
 // Prints a simple command breakdown message.
-gulp.task('help', Tasks.help);
+gulp.task('help', gulp.series([Tasks.help]));
 
 // Default task...
-gulp.task('default', ['build']);
+gulp.task('default', gulp.series(['build']));

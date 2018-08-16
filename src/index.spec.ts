@@ -1,4 +1,4 @@
-import { test, ContextualTestContext } from 'ava';
+import { test, TestContext } from 'ava';
 
 import { Scany } from './';
 
@@ -127,7 +127,7 @@ perInput(`fetch rejects on failure`, (t, input) => {
     })
 }, invalids);
 
-function perInput(prefix: string, cb: (t: ContextualTestContext, input: string) => void | Promise<any>, items: Array<string>) {
+function perInput(prefix: string, cb: (t: TestContext, input: string) => void | Promise<any>, items: Array<string>) {
     items.forEach(input => {
         test(`Scany#${prefix} ("${input}")`, t => {
             return cb(t, input);
