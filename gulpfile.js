@@ -32,7 +32,7 @@ class Tasks {
   }
 
   static watch() {
-    return gulp.watch([paths.src + '**/*'], ['test']);
+    return gulp.watch([paths.src + '**/*'], gulp.series(['test']));
   }
 
   static bump(step) {
