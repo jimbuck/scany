@@ -1,135 +1,145 @@
-import { IncomingMessage } from 'http';
 import { parse } from 'url';
 
-import * as cheerio from 'cheerio';
 import * as UrlPattern from 'url-pattern';
 const got = require('got');
 const FeedParser = require('feedparser');
 const get: (<T>(item: any, path: string, defaultValue?: any) => any) = require('lodash.get');
 
-import { ScanyOptions, ScanResult, VideoData, FlatVideoData, Thumbnails, parseThumbnails } from './models';
+import { ScanOptions, ChannelResult, PlaylistResult, VideoResult, Thumbnails, parseThumbnails } from './models';
+import { Scraper } from './scraper';
+import { extractChannelId, extractPlaylistId, extractUsername, extractVideoId } from './parser';
 
 const userPattern = new UrlPattern('/user/:username');
 const channelPattern = new UrlPattern('/channel/:channelId');
 const playlistPattern = new UrlPattern('/playlist');
 const feedPattern = new UrlPattern('/feeds/videos.xml');
+const videoPattern = new UrlPattern('/watch');
 
 const EMPTY_STRING = '';
 
-export { ScanyOptions, ScanResult, VideoData, FlatVideoData, Thumbnails };
+export { ScanOptions, ChannelResult, PlaylistResult, VideoResult, Thumbnails };
 
 export class Scany {
 
-  private _options: ScanyOptions;
+  private _options: ScanOptions;
+  private _scraper: Scraper;
 
-  constructor(options?: ScanyOptions) {
-    this._options = Object.assign<ScanyOptions, ScanyOptions>({
+  constructor(options?: ScanOptions) {
+    this._options = Object.assign<ScanOptions, ScanOptions>({
       baseFeedUrl: 'https://www.youtube.com/feeds/videos.xml'
     }, options);
+
+    this._scraper = new Scraper();
   }
 
-  public fetch(url: string): Promise<ScanResult> {
-    return this
-      ._convertToFeedUrl(url)
-      .then(feed => this._downloadFeedData(feed));
+  public channel(url: string): Promise<ChannelResult> {
+    return null;
   }
 
-  public fetchFlat(url: string): Promise<Array<FlatVideoData>> {
-    return this
-      ._convertToFeedUrl(url)
-      .then(feed => this._downloadFlatData(feed));
-  }
-
-  private _convertToFeedUrl(url: string): Promise<string> {
-    const urlData = parse(url, true, true);
-
-    // Check if it already is a feed address...    
-    const feedData = feedPattern.match(urlData.pathname);
-    if (feedData !== null) {
-      return Promise.resolve(url);
+  public playlist(url: string): Promise<PlaylistResult> {
+    const playlistId = extractPlaylistId(url);
+    if (!playlistId) {
+      return Promise.reject(`URL ${url} does not reference a playlist!`);
     }
 
-    // Check if it is a user address...    
-    const userData = userPattern.match(urlData.pathname);
-    if (userData !== null && userData.username) {
-      return Promise.resolve(this._options.baseFeedUrl + `?user=${userData.username}`);
+    return this._scraper.scrapePlaylist(playlistId);
+  }
+
+  public video(url: string): Promise<VideoResult> {
+    const videoId = extractVideoId(url);
+
+    if (!videoId) {
+      return Promise.reject(`URL ${url} does not reference a video!`);
     }
 
-    // Check if it is a channel address...    
-    const channelData = channelPattern.match(urlData.pathname);
-    if (channelData !== null && channelData.channelId) {
-      return Promise.resolve(this._options.baseFeedUrl + `?channel_id=${channelData.channelId}`);
-    }
-
-    // Check if it is a playlist address...    
-    const playlistData = playlistPattern.match(urlData.pathname);
-    if (playlistData !== null && urlData.query.list) {
-      return Promise.resolve(this._options.baseFeedUrl + `?playlist_id=${urlData.query.list}`);
-    }
-
-    // Otherwise assume they just specified a username...    
-    return Promise.resolve(this._options.baseFeedUrl + `?user=${url}`);
+    return this._scraper.scrapeVideo(videoId);
   }
 
-  private _downloadFeedData(url: string): Promise<ScanResult> {
-    let result: ScanResult = {
-      videos: []
-    };
 
-    return this._downloadData(url, (meta) => {
-      result.author = meta.author;
-      result.playlist = meta.title || meta.author;
-      result.feed = meta.xmlUrl;
-    }, (video) => {
-      result.videos.push(video);
-    }).then(() => result);
-  }
 
-  private _downloadFlatData(url: string): Promise<Array<FlatVideoData>> {
-    const result: Array<FlatVideoData> = [];
-    let author: string;
-    let playlist: string;
-    let feed: string;
+  // private _fetch<T = ChannelResult | PlaylistResult | VideoResult>(url: string): Promise<T> {
+  //   const urlData = parse(url, true, true);
 
-    return this._downloadData(url, (meta) => {
-      author = meta.author;
-      playlist = meta.title || meta.author;
-      feed = meta.xmlUrl;
-    }, (video: FlatVideoData) => {
-      video.author = author;
-      video.playlist = playlist;
-      video.feed = feed;
-      result.push(video);
-    }).then(() => result);
-  }
+  //   // Check if it already is a feed address...    
+  //   const feedData = feedPattern.match(urlData.pathname);
+  //   if (feedData !== null) {
+  //     return Promise.resolve(url);
+  //   }
 
-  private _downloadData(url: string, onMeta: (meta: any) => void, onVideo: (data: VideoData) => void): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      got.stream(url)
-        .on('error', reject)
-        .pipe(new FeedParser())
-        .on('error', reject)
-        .on('meta', onMeta)
-        .on('readable', function () {
-          let item: any;
-          while (item = this.read()) {
-            const videoId = get(item, 'yt:videoid.#');
-            const video = {
-              title: item.title,
-              description: get(item, 'media:group.media:description.#', EMPTY_STRING),
-              id: videoId,
-              url: item.link,
-              published: item.pubDate,
-              thumbnails: parseThumbnails(videoId),
-              views: parseInt(get(item, 'media:group.media:community.media:statistics.@.views'), 10),
-              rating: parseFloat(get(item, 'media:group.media:community.media:starrating.@.average'))
-            };
-            onVideo(video);
-          }
-        })
-        .on('end', function () {
-          resolve();
-        });
-    });
-  }
+  //   // Check if it is a user address...
+  //   const userData = userPattern.match(urlData.pathname);
+  //   if (userData !== null && userData.username) {
+  //     return Promise.resolve(this._options.baseFeedUrl + `?user=${userData.username}`);
+  //   }
+
+  //   // Check if it is a channel address...
+  //   const channelData = channelPattern.match(urlData.pathname);
+  //   if (channelData !== null && channelData.channelId) {
+  //     return Promise.resolve(this._options.baseFeedUrl + `?channel_id=${channelData.channelId}`);
+  //   }
+
+  //   // Check if it is a playlist address...
+  //   const playlistData = playlistPattern.match(urlData.pathname);
+  //   if (playlistData !== null && urlData.query.list) {
+  //     const playlistId = urlData.query.list as string;
+  //     return this._scraper.scrapePlaylist(playlistId);
+  //   }
+
+  //   const videoData = videoPattern.match(urlData.pathname);
+  //   if (videoData !== null && urlData.query.v) {
+      
+  //   }
+
+  //   // Otherwise assume they just specified a username...    
+  //   return Promise.resolve(this._options.baseFeedUrl + `?user=${url}`);
+  // }
+
+  // private _downloadFeedData(url: string): Promise<ChannelResult> {
+  //   let result: ChannelResult = {
+  //     channel: null,
+  //     channelId: null,
+  //     channelUrl: null,
+  //     videos: []
+  //   };
+
+  //   return this._downloadData(url, (meta) => {
+  //     result.channel = meta.author;
+  //   }, (video) => {
+  //     video.channel = result.channel;
+  //     video.channelId = result.channelId;
+  //     video.channelUrl = result.channelUrl;
+  //     result.videos.push(video);
+  //   }).then(() => result);
+  // }
+
+  // private _downloadData(url: string, onMeta: (meta: any) => void, onVideo: (data: VideoResult) => void): Promise<void> {
+  //   return new Promise<void>((resolve, reject) => {
+  //     got.stream(url)
+  //       .on('error', reject)
+  //       .pipe(new FeedParser())
+  //       .on('error', reject)
+  //       .on('meta', onMeta)
+  //       .on('readable', function () {
+  //         let item: any;
+  //         while (item = this.read()) {
+  //           const videoId = get(item, 'yt:videoid.#');
+  //           const video = {
+  //             video: item.title,
+  //             videoId,
+  //             videoUrl: item.link,
+  //             description: get(item, 'media:group.media:description.#', EMPTY_STRING),
+  //             published: item.pubDate,
+  //             thumbnails: parseThumbnails(videoId),
+  //             views: parseInt(get(item, 'media:group.media:community.media:statistics.@.views'), 10),
+  //             rating: parseFloat(get(item, 'media:group.media:community.media:starrating.@.average'))
+  //           };
+
+  //           onVideo(video);
+  //         }
+  //       })
+  //       .on('end', function () {
+  //         resolve();
+  //       });
+  //   });
+  // }
 }

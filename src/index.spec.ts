@@ -27,105 +27,107 @@ const invalids = [
     `https://www.youtube.com/playlist`
 ];
 
-perInput(`_convertToFeedUrl handles feed links`, async (t, input) => {
-    const scany = new Scany();
+test.todo('e2e tests');
 
-    const url = await scany['_convertToFeedUrl'](input);
+// perInput(`_convertToFeedUrl handles feed links`, async (t, input) => {
+//     const scany = new Scany();
 
-    t.is(url, input);
-}, feeds);
+//     const url = await scany['_convertToFeedUrl'](input);
 
-perInput(`_convertToFeedUrl handles user links`, async (t, input) => {
-    const scany = new Scany();
+//     t.is(url, input);
+// }, feeds);
 
-    const url = await scany['_convertToFeedUrl'](`https://www.youtube.com/user/${input}`);
+// perInput(`_convertToFeedUrl handles user links`, async (t, input) => {
+//     const scany = new Scany();
 
-    t.is(url, `${scany['_options'].baseFeedUrl}?user=${input}`);
-}, usernames);
+//     const url = await scany['_convertToFeedUrl'](`https://www.youtube.com/user/${input}`);
 
-perInput(`_convertToFeedUrl handles channel links`, async (t, input) => {
-    const scany = new Scany();
+//     t.is(url, `${scany['_options'].baseFeedUrl}?user=${input}`);
+// }, usernames);
 
-    const url = await scany['_convertToFeedUrl'](`https://www.youtube.com/channel/${input}`);
+// perInput(`_convertToFeedUrl handles channel links`, async (t, input) => {
+//     const scany = new Scany();
 
-    t.is(url, `${scany['_options'].baseFeedUrl}?channel_id=${input}`);
-}, channelIds);
+//     const url = await scany['_convertToFeedUrl'](`https://www.youtube.com/channel/${input}`);
 
-perInput(`_convertToFeedUrl handles playlist links`, async (t, input) => {
-    const scany = new Scany();
+//     t.is(url, `${scany['_options'].baseFeedUrl}?channel_id=${input}`);
+// }, channelIds);
 
-    const url = await scany['_convertToFeedUrl'](`https://www.youtube.com/playlist?list=${input}`);
+// perInput(`_convertToFeedUrl handles playlist links`, async (t, input) => {
+//     const scany = new Scany();
 
-    t.is(url, `${scany['_options'].baseFeedUrl}?playlist_id=${input}`);
-}, playlists);
+//     const url = await scany['_convertToFeedUrl'](`https://www.youtube.com/playlist?list=${input}`);
 
-perInput(`_convertToFeedUrl handles usernames`, async (t, input) => {
-    const scany = new Scany();
+//     t.is(url, `${scany['_options'].baseFeedUrl}?playlist_id=${input}`);
+// }, playlists);
 
-    const url = await scany['_convertToFeedUrl'](input);
+// perInput(`_convertToFeedUrl handles usernames`, async (t, input) => {
+//     const scany = new Scany();
 
-    t.is(url, `${scany['_options'].baseFeedUrl}?user=${input}`);
-}, usernames);
+//     const url = await scany['_convertToFeedUrl'](input);
 
-perInput(`fetch creates usable data`, async (t, input) => {
-    const scany = new Scany();
+//     t.is(url, `${scany['_options'].baseFeedUrl}?user=${input}`);
+// }, usernames);
 
-    const result = await scany.fetch(input);
+// perInput(`fetch creates usable data`, async (t, input) => {
+//     const scany = new Scany();
 
-    t.is(typeof result.author, 'string');
-    t.is(typeof result.playlist, 'string');
-    t.is(typeof result.feed, 'string');
-    t.true(Array.isArray(result.videos));
+//     const result = await scany.fetch(input);
 
-    result.videos.forEach(video => {
-        t.is(typeof video.title, 'string');
-        t.is(typeof video.description, 'string');
-        t.is(typeof video.url, 'string');
-        t.true(video.published instanceof Date);
-        t.is(typeof video.id, 'string');
-        t.is(typeof video.rating, 'number');
-        t.is(typeof video.views, 'number');
+//     t.is(typeof result.author, 'string');
+//     t.is(typeof result.playlist, 'string');
+//     t.is(typeof result.feed, 'string');
+//     t.true(Array.isArray(result.videos));
 
-        t.not(typeof video.thumbnails, 'undefined');
+//     result.videos.forEach(video => {
+//         t.is(typeof video.title, 'string');
+//         t.is(typeof video.description, 'string');
+//         t.is(typeof video.url, 'string');
+//         t.true(video.published instanceof Date);
+//         t.is(typeof video.id, 'string');
+//         t.is(typeof video.rating, 'number');
+//         t.is(typeof video.views, 'number');
 
-        // Just check for one, since all of them are covered by other tests.        
-        t.is(typeof video.thumbnails.high, 'string');
-    });
-}, feeds);
+//         t.not(typeof video.thumbnails, 'undefined');
 
-perInput(`fetchFlat creates flat data`, async (t, input) => {
-    const scany = new Scany();
+//         // Just check for one, since all of them are covered by other tests.        
+//         t.is(typeof video.thumbnails.high, 'string');
+//     });
+// }, feeds);
 
-    const result = await scany.fetchFlat(input);
+// perInput(`fetchFlat creates flat data`, async (t, input) => {
+//     const scany = new Scany();
 
-    t.true(Array.isArray(result));
+//     const result = await scany.fetchFlat(input);
 
-    result.forEach(video => {
-        t.is(typeof video.author, 'string');
-        t.is(typeof video.playlist, 'string');
-        t.is(typeof video.feed, 'string');
-        t.is(typeof video.title, 'string');
-        t.is(typeof video.description, 'string');
-        t.is(typeof video.url, 'string');
-        t.true(video.published instanceof Date);
-        t.is(typeof video.id, 'string');
-        t.is(typeof video.rating, 'number');
-        t.is(typeof video.views, 'number');
+//     t.true(Array.isArray(result));
 
-        t.not(typeof video.thumbnails, 'undefined');
+//     result.forEach(video => {
+//         t.is(typeof video.author, 'string');
+//         t.is(typeof video.playlist, 'string');
+//         t.is(typeof video.feed, 'string');
+//         t.is(typeof video.title, 'string');
+//         t.is(typeof video.description, 'string');
+//         t.is(typeof video.url, 'string');
+//         t.true(video.published instanceof Date);
+//         t.is(typeof video.id, 'string');
+//         t.is(typeof video.rating, 'number');
+//         t.is(typeof video.views, 'number');
 
-        // Just check for one, since all of them are covered by other tests.        
-        t.is(typeof video.thumbnails.high, 'string');
-    });
-}, feeds);
+//         t.not(typeof video.thumbnails, 'undefined');
 
-perInput(`fetch rejects on failure`, (t, input) => {
-    const scany = new Scany();
+//         // Just check for one, since all of them are covered by other tests.        
+//         t.is(typeof video.thumbnails.high, 'string');
+//     });
+// }, feeds);
 
-    return scany.fetch(input).then(result => t.fail(), err => {
-        t.not(typeof err, 'undefined');
-    })
-}, invalids);
+// perInput(`fetch rejects on failure`, (t, input) => {
+//     const scany = new Scany();
+
+//     return scany.fetch(input).then(result => t.fail(), err => {
+//         t.not(typeof err, 'undefined');
+//     })
+// }, invalids);
 
 function perInput(prefix: string, cb: (t: TestContext, input: string) => void | Promise<any>, items: Array<string>) {
     items.forEach(input => {

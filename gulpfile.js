@@ -27,6 +27,10 @@ class Tasks {
     return shell.task('nyc --color -a ava -v');
   }
 
+  static get debug() {
+    return shell.task(`node ./dist/debug`);
+  }
+
   static get coverage() {
     return shell.task(`nyc --reporter=lcov -a ava -v & start ${paths.coverage}lcov-report/index.html`);
   }
@@ -63,6 +67,8 @@ gulp.task('build', gulp.series(['clean', Tasks.buildSrc]));
 
 // Run the basic `npm test` command after a quick build...
 gulp.task('test', gulp.series(['build', Tasks.test]));
+
+gulp.task('debug', gulp.series(['build', Tasks.debug]));
 
 // Run tests, generate the HTML coverage report and open the browser.
 gulp.task('coverage', gulp.series(['build', Tasks.coverage]));

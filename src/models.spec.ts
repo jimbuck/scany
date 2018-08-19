@@ -1,6 +1,6 @@
 import { test } from 'ava';
 
-import { parseThumbnails, Thumbnails } from './models';
+import { parseThumbnails } from './models';
 
 test(`parseThumbnails properly creates all available image URLs`, t => {
   const videoId = 'unIIn_1JOAE';

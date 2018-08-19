@@ -1,30 +1,32 @@
 
-export interface ScanyOptions {
+export interface ScanOptions {
   baseFeedUrl?: string;
 }
 
-export interface ScanResult {
-  playlist?: string;
-  author?: string;
-  feed?: string;
-  videos?: Array<VideoData>;
+export interface ChannelResult {
+  channelId: string;
+  channel: string;
+  channelUrl: string;
+  videos: Array<VideoResult>;
 }
 
-export interface VideoData {
-  title: string;
+export interface PlaylistResult extends ChannelResult {
+  playlistId: string;
+  playlist: string;
+  playlistUrl: string;
+}
+
+export interface VideoResult {
+  videoId: string;
+  video: string;
+  videoUrl: string;
+  channel: string;
+  channelId: string;
+  channelUrl: string;
   description: string;
-  id: string;
-  url: string;
   published: Date;
   thumbnails: Thumbnails;
   views: number;
-  rating: number;
-}
-
-export interface FlatVideoData extends VideoData {
-  author?: string;
-  playlist?: string;
-  feed?: string;
 }
 
 export interface Thumbnails {
