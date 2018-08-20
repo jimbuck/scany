@@ -2,7 +2,7 @@ import { test } from 'ava';
 
 import { Scraper } from './scraper';
 
-test('Scraper#video gets video info', async (t) => {
+test.serial('Scraper#video gets video info', async (t) => {
     let scraper = new Scraper();
     const result = await scraper.video('DEVi0mEaJJQ');
 
@@ -18,7 +18,7 @@ test('Scraper#video gets video info', async (t) => {
     t.is(typeof result.views, 'number');
 });
 
-test('Scraper#videos gets multiple videos info', async (t) => {
+test.serial('Scraper#videos gets multiple videos info', async (t) => {
     let scraper = new Scraper();
 
     const results = await scraper.videos(['OFbBs9M0cqw', 'beaHxW5o-uw']);
@@ -37,7 +37,7 @@ test('Scraper#videos gets multiple videos info', async (t) => {
     });
 });
 
-test('Scraper#playlist gets playlist info', async (t) => {
+test.serial('Scraper#playlist gets playlist info', async (t) => {
     let scraper = new Scraper();
 
     const result = await scraper.playlist('PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');

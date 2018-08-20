@@ -6,6 +6,7 @@ let log = debug('scany:scraper');
 
 import { PlaylistResult, VideoResult } from './models';
 import { extractChannelId, extractVideoId, createPlaylistUrl, createVideoUrl } from './parser';
+import { queueUp, pTimes, pSeries, pParallel } from './utils';
 
 const EMPTY_STRING = '';
 
@@ -20,7 +21,7 @@ export class Scraper {
     }
 
     public async video(videoId: string): Promise<VideoResult> {
-
+        log(`Scraping a single video (${videoId})...`);
         let now = new Date();
 
         const browser = await createBrowser({ show: this._show });
@@ -37,6 +38,7 @@ export class Scraper {
     }
 
     public async videos(videoIds: Array<string>): Promise<Array<VideoResult>> {
+        log(`Scraping ${videoIds.length} videos...`);
         let now = new Date();
         let videos = videoIds.map(videoId => ({ videoId })) as Array<VideoResult>;
 
@@ -51,6 +53,7 @@ export class Scraper {
 
     public async playlist(playlistId: string, videoIdsOnly: boolean = false): Promise<PlaylistResult> {
         let now = new Date();
+        log(`Scraping playlist '${playlistId}'...`);
 
         const browser = await createBrowser({ show: this._show});
         
@@ -120,6 +123,7 @@ export class Scraper {
         result.channelId = extractChannelId(result.channelUrl);
 
         if (!videoIdsOnly) {
+            log(`Retrieving video data...`);
             result.videos = await _scrapeVideos(browser, result.videos, now, this._concurrency);
         }
 
@@ -150,9 +154,13 @@ async function _scrapeVideos(browser: Browser, videos: Array<VideoResult>, lastS
 
 async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Promise <VideoResult> {
 
+    log(`Scraping video ${videoId}...`);
+
     const videoUrl = createVideoUrl(videoId);
 
     await page.goto(videoUrl);
+
+    await page.$eval('video', (player: HTMLVideoElement) => player.pause());
 
     /* istanbul ignore next */
     await page.waitFor(() => {
@@ -204,37 +212,4 @@ async function createBrowser({ show }: { show: boolean}): Promise<Browser> {
 
 function makeAbsolute(path: string): string {
     return path.startsWith('/') ? `https://youtube.com${path}` : path;
-}
-
-function queueUp<T>(arr: Array<T>, count: number): Array<Array<T>> {
-    if (count < 2) return [arr];
-    
-    let chunks: Array<Array<T>> = [];
-    let maxSize = Math.ceil(arr.length / count);
-    for (let i = 0, j = arr.length; i < j; i += maxSize) {
-        chunks.push(arr.slice(i, i + maxSize));
-    }
-    return chunks;
-}
-
-async function pTimes<T>(times: number, create: () => Promise<T>): Promise<Array<T>> {
-    return await Promise.all(Array(times).fill(0).map(() => create()));
-}
-
-async function pParallel<TItem, TResult>(items: Array<TItem>, work: (item: TItem, i: number) => Promise<TResult>): Promise<Array<TResult>> {
-    return await Promise.all(items.map(async (x, i) => await work(x, i)));
-}
-
-async function pSeries<TItem, TResult>(items: Array<TItem>, work: (item: TItem, i: number) => Promise<TResult>): Promise<Array<TResult>> {
-    let p = Promise.resolve();
-    let results: Array<TResult> = [];
-    for (let i = 0; i < items.length; i++) {
-        p = p.then(async () => {
-            results.push(await work(items[i], i));
-        });
-    }
-
-    await p;
-
-    return results;
 }

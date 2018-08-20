@@ -1,9 +1,10 @@
-
+import * as debug from 'debug';
+const log = debug('scany');
 
 import { ChannelResult, PlaylistResult, VideoResult, Thumbnails, parseThumbnails } from './models';
 import { Scraper } from './scraper';
 import { Reader } from './reader';
-import { extractChannelId, extractPlaylistId, extractVideoId, extractUsername } from './parser';
+import { extractChannelId, extractPlaylistId, extractVideoId } from './parser';
 
 export { ChannelResult, PlaylistResult, VideoResult, Thumbnails };
 
@@ -13,7 +14,7 @@ export class Scany {
   private _reader: Reader;
 
   constructor({ show, concurrency }: { show?: boolean, concurrency?: number } = {}) {
-    this._scraper = new Scraper({ show, concurrency });
+    this._scraper = new Scraper({ show: true, concurrency });
     this._reader = new Reader();
   }
 

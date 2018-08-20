@@ -1,3 +1,4 @@
+import * as debug from 'debug';
 const got = require('got');
 const FeedParser = require('feedparser');
 const get: (<T>(item: any, path: string, defaultValue?: any) => any) = require('lodash.get');
@@ -5,6 +6,7 @@ const get: (<T>(item: any, path: string, defaultValue?: any) => any) = require('
 import { ChannelResult, VideoResult, parseThumbnails } from './models';
 import { extractChannelId } from './parser';
 
+const log = debug('scany:reader');
 const EMPTY_STRING = '';
 
 export class Reader {
@@ -16,10 +18,12 @@ export class Reader {
     }
 
     public async channel(channelId: string): Promise<ChannelResult> {
+        log(`Reading feed for channel ${channelId}...`);
         return _read(`${this._baseFeedUrl}?channel_id=${channelId}`);
     }
 
     public async user(username: string): Promise<ChannelResult> {
+        log(`Reading feed for user ${username}...`);
         return _read(`${this._baseFeedUrl}?user=${username}`);
     }
 }

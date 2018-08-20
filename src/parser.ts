@@ -4,9 +4,6 @@ import * as UrlPattern from 'url-pattern';
 
 const userPattern = new UrlPattern('/user/:username');
 const channelPattern = new UrlPattern('/channel/:channelId');
-const playlistPattern = new UrlPattern('/playlist');
-const feedPattern = new UrlPattern('/feeds/videos.xml');
-const videoPattern = new UrlPattern('/watch');
 
 export function extractPlaylistId(url: string): string {
     const urlData = parse(url, true, true);
