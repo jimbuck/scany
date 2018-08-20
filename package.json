@@ -1,6 +1,6 @@
 {
   "name": "scany",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Easily grab recent video data from user, channel, and playlist URLs!",
   "main": "index.js",
   "types": "./dist/index.d.ts",
