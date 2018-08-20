@@ -1,40 +1,61 @@
-import * as scrapeIt from 'scrape-it';
-//import * as Nightmare from 'nightmare';
 const Nightmare = require('nightmare');
+import * as scrapeIt from 'scrape-it';
 
 import { PlaylistResult, VideoResult } from './models';
-import { extractChannelId, extractVideoId } from './parser';
-import { AsyncResource } from 'async_hooks';
+import { extractChannelId, extractVideoId, createPlaylistUrl, createVideoUrl } from './parser';
 
 const EMPTY_STRING = '';
 
 export class Scraper {
 
-    public constructor() {
+    private _show: boolean;
 
+    public constructor({ show }: { show?: boolean } = {}) {
+        this._show = !!show;
     }
 
-    public async scrapeVideo(videoId: string): Promise<VideoResult> {
+    public async video(videoId: string): Promise<VideoResult> {
 
+        let now = new Date();
+        
         let browser = new Nightmare({
-            show: false,
-            openDevTools: {
-                mode: 'detach'
-            }
+            show: this._show,
+            // openDevTools: { mode: 'detach' }
         });
 
-        let result = await _scrapeVideo(browser, videoId);
+        let result = await _scrapeVideo(browser, videoId, now);
 
         browser.end();
 
         return result;
     }
 
-    public async scrapePlaylist(playlistId: string): Promise<PlaylistResult> {
-        console.log(`Starting playlist scrape...`);
-        let browser = new Nightmare({ show: true });
+    public async videos(videoIds: Array<string>): Promise<Array<VideoResult>> {
+        let now = new Date();
         
-        await browser.goto(`https://www.youtube.com/playlist?list=${playlistId}`);
+        let browser = new Nightmare({
+            show: this._show,
+            // openDevTools: { mode: 'detach' }
+        });
+
+        let videoResults = await _scrapeVideos(browser, videoIds, now);
+
+        browser.end();
+
+        return videoResults;
+    }
+
+    public async playlist(playlistId: string, videoIdsOnly: boolean = false): Promise<PlaylistResult> {
+        let now = new Date();
+
+        let browser = new Nightmare({
+            show: this._show,
+            // openDevTools: { mode: 'detach' }
+        });
+        
+        const playlistUrl = createPlaylistUrl(playlistId);
+
+        await browser.goto(playlistUrl);
 
         /* istanbul ignore next */
         await browser.wait(() => {
@@ -47,21 +68,7 @@ export class Scraper {
         let result: PlaylistResult;
 
         if (isV1) {
-            /* istanbul ignore next */
-            const html = await browser.evaluate((moreButton: string) => {
-                let btn = document.querySelector(moreButton) as HTMLElement;
-                while (btn) {
-                    btn.click();
-                    btn = document.querySelector(moreButton) as HTMLElement;
-                }
-
-                return document.body.innerHTML;
-            }, 'MORE BUTTON SELECTOR').end();
-
-            result = await scrapeIt.scrapeHTML<PlaylistResult>(html, {
-                playlist: '',
-                playlistId: '',
-            });
+            throw new Error('Older YouTube page format not supported (yet)!');
         } else {
             let expectedVideos: number
             let visibleVideos: number;
@@ -91,7 +98,8 @@ export class Scraper {
                 channel: '#owner-name a',
                 channelUrl: { selector: '#owner-name a', attr: 'href', convert: makeAbsolute },
                 videos: {
-                    listItem: '#contents > ytd-playlist-video-renderer', data: {
+                    listItem: '#contents > ytd-playlist-video-renderer',
+                    data: {
                         videoId: {
                             selector: '#content > a',
                             attr: 'href',
@@ -100,27 +108,43 @@ export class Scraper {
                     }
                 }
             });
-        }      
+        }
 
+        result.lastScanned = now;
         result.playlistId = playlistId;
-        result.playlistUrl = `https://www.youtube.com/playlist?list=${playlistId}`;
+        result.playlistUrl = playlistUrl;
         result.channelId = extractChannelId(result.channelUrl);
 
-        result.videos = await Promise.all(result.videos.map(videoResult => _scrapeVideo(browser, videoResult.videoId)));
+        if (!videoIdsOnly) {
+            result.videos = await _scrapeVideos(browser, result.videos, now);
+        }
 
         await browser.end();
-
-        console.log(`Finishing playlist scrape...`);
 
         return result;
     }
 }
 
-async function _scrapeVideo(browser: any, videoId: string): Promise <VideoResult> {
+async function _scrapeVideos(browser: any, videos: Array<string>|Array<VideoResult>, lastScanned: Date): Promise<Array<VideoResult>> {
+    let fullVideos: Array<VideoResult> = [];
+    for (let videoId of videos) {
+        if (typeof videoId !== 'string') {
+            videoId = videoId.videoId;
+        }
+        let videoResult = await _scrapeVideo(browser, videoId, lastScanned);
+        fullVideos.push(videoResult);
+    }
 
-    console.log(`Starting video scrape...`);
+    return fullVideos;
+}
 
-    await browser.goto(`http://youtube.com/watch?v=${videoId}`);
+async function _scrapeVideo(browser: any, videoId: string, lastScanned: Date): Promise <VideoResult> {
+
+    const videoUrl = createVideoUrl(videoId);
+
+    await browser.goto(videoUrl);
+
+    //await browser.type('body', 'k');
 
     /* istanbul ignore next */
     await browser.wait(() => {
@@ -136,14 +160,7 @@ async function _scrapeVideo(browser: any, videoId: string): Promise <VideoResult
     let result: VideoResult;
 
     if(isV1) {
-        result = await scrapeIt.scrapeHTML<VideoResult>(html, {
-            video: { selector: 'meta[itemprop=name]', attr: 'content' },
-            channel: '',
-            description: '',
-            published: {},
-            views: {}
-
-        });
+        throw new Error('Older YouTube page format not supported (yet)!');
     } else {
         result = await scrapeIt.scrapeHTML<VideoResult>(html, {
             video: 'h1.title',
@@ -162,10 +179,9 @@ async function _scrapeVideo(browser: any, videoId: string): Promise <VideoResult
     }
 
     result.videoId = videoId;
-    result.videoUrl = `https://youtube.com/watch?v=${videoId}`;
+    result.videoUrl = videoUrl;
     result.channelId = extractChannelId(result.channelUrl);
-
-    console.log(`Finishing playlist scrape...`);
+    result.lastScanned = lastScanned;
 
     return result;
 }

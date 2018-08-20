@@ -1,13 +1,10 @@
 
-export interface ScanOptions {
-  baseFeedUrl?: string;
-}
-
 export interface ChannelResult {
   channelId: string;
   channel: string;
   channelUrl: string;
   videos: Array<VideoResult>;
+  lastScanned: Date;
 }
 
 export interface PlaylistResult extends ChannelResult {
@@ -27,6 +24,7 @@ export interface VideoResult {
   published: Date;
   thumbnails: Thumbnails;
   views: number;
+  lastScanned: Date;
 }
 
 export interface Thumbnails {

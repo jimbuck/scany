@@ -1,14 +1,12 @@
-import { Scany, PlaylistResult, VideoResult } from './';
-
-const scany = new Scany();
+import { Scany } from './';
 
 (async function () {
+  const scany = new Scany();
+
   console.log('Scanning for video...');
-  const videoResult = await scany.video('https://www.youtube.com/watch?v=DEVi0mEaJJQ');
-  console.log(`${videoResult.video} - ${videoResult.channel} (${videoResult.views} views)`);
-
-  await delay(500)();
-
+  const channelResult = await scany.channel('https://www.youtube.com/channel/UCH-_hzb2ILSCo9ftVSnrCIQ');
+  
+  const playlist = await scany.playlist('');
 
   console.log('Done!');
 })().catch(err => { 

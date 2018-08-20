@@ -29,7 +29,7 @@ export function extractVideoId(url: string): string {
 
     return videoId;
 }
-  
+
 export function extractChannelId(url: string): string {
     const urlData = parse(url, true, true);
     let channelId = null;
@@ -52,4 +52,12 @@ export function extractUsername(url: string): string {
     }
 
     return username;
+}
+
+export function createPlaylistUrl(playlistId: string): string {
+    return `https://www.youtube.com/playlist?list=${playlistId}`;
+}
+
+export function createVideoUrl(videoId: string): string {
+    return `https://www.youtube.com/watch?v=${videoId}`;
 }
