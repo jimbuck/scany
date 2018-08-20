@@ -2,7 +2,7 @@ import { test } from 'ava';
 
 import { Scany } from './';
 
-test('e2e - Scany#video gets video info', async (t) => {
+test.serial('e2e - Scany#video gets video info', async (t) => {
     let scany = new Scany();
     const result = await scany.video('DEVi0mEaJJQ');
 
@@ -18,7 +18,7 @@ test('e2e - Scany#video gets video info', async (t) => {
     t.is(typeof result.views, 'number');
 });
 
-test('e2e - Scany#videos gets multiple videos info', async (t) => {
+test.serial('e2e - Scany#videos gets multiple videos info', async (t) => {
     let scany = new Scany();
     const results = await scany.videos(['OFbBs9M0cqw', 'beaHxW5o-uw']);
 
@@ -36,7 +36,7 @@ test('e2e - Scany#videos gets multiple videos info', async (t) => {
     });
 });
 
-test('e2e - Scany#playlist gets playlist info', async (t) => {
+test.serial('e2e - Scany#playlist gets playlist info', async (t) => {
     let scany = new Scany();
     const result = await scany.playlist('PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
 
@@ -52,7 +52,7 @@ test('e2e - Scany#playlist gets playlist info', async (t) => {
     result.videos.forEach(video => t.truthy(video.videoId));
 });
 
-test('e2e - Scany#channel gets channel info', async (t) => {
+test.serial('e2e - Scany#channel gets channel info', async (t) => {
     let scany = new Scany();
     const result = await scany.channel('UC6107grRI4m0o2-emgoDnAA');
 

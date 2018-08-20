@@ -20,6 +20,7 @@ test('Scraper#video gets video info', async (t) => {
 
 test('Scraper#videos gets multiple videos info', async (t) => {
     let scraper = new Scraper();
+
     const results = await scraper.videos(['OFbBs9M0cqw', 'beaHxW5o-uw']);
 
     results.forEach(result => {
@@ -38,6 +39,7 @@ test('Scraper#videos gets multiple videos info', async (t) => {
 
 test('Scraper#playlist gets playlist info', async (t) => {
     let scraper = new Scraper();
+
     const result = await scraper.playlist('PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
 
     t.truthy(result.channel);

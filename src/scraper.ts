@@ -1,5 +1,8 @@
-const Nightmare = require('nightmare');
+import * as puppeteer from 'puppeteer';
+import { Browser, Page } from 'puppeteer';
 import * as scrapeIt from 'scrape-it';
+import * as debug from 'debug';
+let log = debug('scany:scraper');
 
 import { PlaylistResult, VideoResult } from './models';
 import { extractChannelId, extractVideoId, createPlaylistUrl, createVideoUrl } from './parser';
@@ -9,38 +12,39 @@ const EMPTY_STRING = '';
 export class Scraper {
 
     private _show: boolean;
+    private _concurrency: number;
 
-    public constructor({ show }: { show?: boolean } = {}) {
+    public constructor({ show, concurrency }: { show?: boolean, concurrency?: number } = {}) {
         this._show = !!show;
+        this._concurrency = concurrency || 2;
     }
 
     public async video(videoId: string): Promise<VideoResult> {
 
         let now = new Date();
+
+        const browser = await createBrowser({ show: this._show });
         
-        let browser = new Nightmare({
-            show: this._show,
-            // openDevTools: { mode: 'detach' }
-        });
+        const page = await browser.newPage();
 
-        let result = await _scrapeVideo(browser, videoId, now);
+        let result = await _scrapeVideo(page, videoId, now);
 
-        browser.end();
+        await page.close();
+
+        await browser.close();
 
         return result;
     }
 
     public async videos(videoIds: Array<string>): Promise<Array<VideoResult>> {
         let now = new Date();
-        
-        let browser = new Nightmare({
-            show: this._show,
-            // openDevTools: { mode: 'detach' }
-        });
+        let videos = videoIds.map(videoId => ({ videoId })) as Array<VideoResult>;
 
-        let videoResults = await _scrapeVideos(browser, videoIds, now);
+        const browser = await createBrowser({show: this._show});
 
-        browser.end();
+        let videoResults = await _scrapeVideos(browser, videos, now);
+
+        await browser.close();
 
         return videoResults;
     }
@@ -48,22 +52,21 @@ export class Scraper {
     public async playlist(playlistId: string, videoIdsOnly: boolean = false): Promise<PlaylistResult> {
         let now = new Date();
 
-        let browser = new Nightmare({
-            show: this._show,
-            // openDevTools: { mode: 'detach' }
-        });
+        const browser = await createBrowser({ show: this._show});
+        
+        const page = await browser.newPage();
         
         const playlistUrl = createPlaylistUrl(playlistId);
 
-        await browser.goto(playlistUrl);
+        await page.goto(playlistUrl);
 
         /* istanbul ignore next */
-        await browser.wait(() => {
+        await page.waitFor(() => {
             let title = document.querySelector('#title');
             return title && title.textContent && title.textContent.length > 0;
         });
 
-        const isV1 = await browser.exists('ytd-app').then((exists: boolean) => !exists);
+        const isV1 = (await page.$('ytd-app')) === null;
 
         let result: PlaylistResult;
 
@@ -74,23 +77,24 @@ export class Scraper {
             let visibleVideos: number;
 
             /* istanbul ignore next */
-            expectedVideos = await browser.evaluate(() => parseInt(document.querySelector('#stats > yt-formatted-string:nth-child(1)').textContent, 10));
+            expectedVideos = await page.evaluate(() => parseInt(document.querySelector('#stats > yt-formatted-string:nth-child(1)').textContent, 10));
             /* istanbul ignore next */
-            visibleVideos = await browser.evaluate(() => document.querySelectorAll('#contents > ytd-playlist-video-renderer').length);
+            visibleVideos = await page.evaluate(() => document.querySelectorAll('#contents > ytd-playlist-video-renderer').length);
 
             // infinite scroll
             while (visibleVideos < expectedVideos) {
                 /* istanbul ignore next */
-                await browser.scrollTo(999999999, 0).wait(200);
+                await page.evaluate(() => window.scrollBy(0, window.innerHeight));
+                await page.waitFor(200);
 
                 /* istanbul ignore next */
-                expectedVideos = await browser.evaluate(() => parseInt(document.querySelector('#stats > yt-formatted-string:nth-child(1)').textContent, 10));
+                expectedVideos = await page.evaluate(() => parseInt(document.querySelector('#stats > yt-formatted-string:nth-child(1)').textContent, 10));
                 /* istanbul ignore next */
-                visibleVideos = await browser.evaluate(() => document.querySelectorAll('#contents > ytd-playlist-video-renderer').length);
+                visibleVideos = await page.evaluate(() => document.querySelectorAll('#contents > ytd-playlist-video-renderer').length);
             }
 
             /* istanbul ignore next */
-            const html = await browser.evaluate(() => document.body.innerHTML);
+            const html = await page.content();
 
             result = await scrapeIt.scrapeHTML<PlaylistResult>(html, {
                 playlist: '#title',
@@ -116,46 +120,49 @@ export class Scraper {
         result.channelId = extractChannelId(result.channelUrl);
 
         if (!videoIdsOnly) {
-            result.videos = await _scrapeVideos(browser, result.videos, now);
+            result.videos = await _scrapeVideos(browser, result.videos, now, this._concurrency);
         }
 
-        await browser.end();
+        await browser.close();
 
         return result;
     }
 }
 
-async function _scrapeVideos(browser: any, videos: Array<string>|Array<VideoResult>, lastScanned: Date): Promise<Array<VideoResult>> {
-    let fullVideos: Array<VideoResult> = [];
-    for (let videoId of videos) {
-        if (typeof videoId !== 'string') {
-            videoId = videoId.videoId;
-        }
-        let videoResult = await _scrapeVideo(browser, videoId, lastScanned);
-        fullVideos.push(videoResult);
-    }
+async function _scrapeVideos(browser: Browser, videos: Array<VideoResult>, lastScanned: Date, concurrency: number = 1): Promise<Array<VideoResult>> {
+    log(`Starting processing of ${videos.length} videos...`);
+    let queue = queueUp(videos, concurrency);
+    let pages = await pTimes(queue.length, () => browser.newPage());
 
-    return fullVideos;
+    let batches = await pParallel(pages, (page, pageIndex) => {
+        log(`Starting batch ${pageIndex}...`);
+        let videos = queue[pageIndex];
+        return pSeries(videos, video => {
+            log(`Scraping video ${video.videoId} on page ${pageIndex}...`);
+            return _scrapeVideo(page, video.videoId, lastScanned);
+        })
+    });
+
+    await pParallel(pages, page => page.close());
+
+    return batches.reduce((a, b) => a.concat(b), []);
 }
 
-async function _scrapeVideo(browser: any, videoId: string, lastScanned: Date): Promise <VideoResult> {
+async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Promise <VideoResult> {
 
     const videoUrl = createVideoUrl(videoId);
 
-    await browser.goto(videoUrl);
-
-    //await browser.type('body', 'k');
+    await page.goto(videoUrl);
 
     /* istanbul ignore next */
-    await browser.wait(() => {
+    await page.waitFor(() => {
         let title = document.querySelector('h1.title');
         return title && title.textContent && title.textContent.length > 0;
-    });
+    }, { polling: 50 });
 
-    const isV1 = await browser.exists('ytd-app').then((exists: boolean) => !exists);
+    const isV1 = (await page.$('ytd-app')) === null;
 
-    /* istanbul ignore next */
-    const html = await browser.evaluate(() => document.body.innerHTML);
+    const html = await page.content();
 
     let result: VideoResult;
 
@@ -186,6 +193,48 @@ async function _scrapeVideo(browser: any, videoId: string, lastScanned: Date): P
     return result;
 }
 
+async function createBrowser({ show }: { show: boolean}): Promise<Browser> {
+    return await puppeteer.launch({
+        headless: !show,
+        ignoreHTTPSErrors: true,
+        timeout: 0,
+        //devtools: true
+    });
+}
+
 function makeAbsolute(path: string): string {
     return path.startsWith('/') ? `https://youtube.com${path}` : path;
+}
+
+function queueUp<T>(arr: Array<T>, count: number): Array<Array<T>> {
+    if (count < 2) return [arr];
+    
+    let chunks: Array<Array<T>> = [];
+    let maxSize = Math.ceil(arr.length / count);
+    for (let i = 0, j = arr.length; i < j; i += maxSize) {
+        chunks.push(arr.slice(i, i + maxSize));
+    }
+    return chunks;
+}
+
+async function pTimes<T>(times: number, create: () => Promise<T>): Promise<Array<T>> {
+    return await Promise.all(Array(times).fill(0).map(() => create()));
+}
+
+async function pParallel<TItem, TResult>(items: Array<TItem>, work: (item: TItem, i: number) => Promise<TResult>): Promise<Array<TResult>> {
+    return await Promise.all(items.map(async (x, i) => await work(x, i)));
+}
+
+async function pSeries<TItem, TResult>(items: Array<TItem>, work: (item: TItem, i: number) => Promise<TResult>): Promise<Array<TResult>> {
+    let p = Promise.resolve();
+    let results: Array<TResult> = [];
+    for (let i = 0; i < items.length; i++) {
+        p = p.then(async () => {
+            results.push(await work(items[i], i));
+        });
+    }
+
+    await p;
+
+    return results;
 }

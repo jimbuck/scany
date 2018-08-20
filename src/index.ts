@@ -12,28 +12,12 @@ export class Scany {
   private _scraper: Scraper;
   private _reader: Reader;
 
-  constructor({ show }: { show?: boolean } = {}) {
-    this._scraper = new Scraper({ show });
+  constructor({ show, concurrency }: { show?: boolean, concurrency?: number } = {}) {
+    this._scraper = new Scraper({ show, concurrency });
     this._reader = new Reader();
   }
 
-  // public fetch(url: string): Promise<ChannelResult | PlaylistResult | VideoResult> {
-  //   let videoId = extractVideoId(url);
-  //   if (videoId) return this.video(url);
-    
-  //   let username = extractUsername(url);
-  //   if (username) return this.channel(url);
-
-  //   let playlistId = extractPlaylistId(url);
-  //   if (playlistId) return this.playlist(url);
-
-  //   let channelId = extractChannelId(url);
-  //   if (channelId) return this.channel(url);
-    
-  //   return Promise.reject(`'${url}' is not a supported youtube link!`);
-  // }
-
-  public channel(url: string): Promise<ChannelResult> {
+  public async channel(url: string): Promise<ChannelResult> {
     let channelId = extractChannelId(url) || url;
 
     if (channelId === null) {
@@ -43,7 +27,7 @@ export class Scany {
     return this._reader.channel(channelId);
   }
 
-  public playlist(url: string, videoIdsOnly: boolean = false): Promise<PlaylistResult> {
+  public async playlist(url: string, videoIdsOnly: boolean = false): Promise<PlaylistResult> {
     const playlistId = extractPlaylistId(url) || url;
 
     if (!playlistId) {
@@ -53,7 +37,7 @@ export class Scany {
     return this._scraper.playlist(playlistId, videoIdsOnly);
   }
 
-  public video(url: string): Promise<VideoResult> {
+  public async video(url: string): Promise<VideoResult> {
     const videoId = extractVideoId(url) || url;
 
     if (!videoId) {
@@ -63,9 +47,9 @@ export class Scany {
     return this._scraper.video(videoId);
   }
 
-  public videos(urls: Array<string>): Promise<Array<VideoResult>>
-  public videos(videoIds: Array<VideoResult>): Promise<Array<VideoResult>>;
-  public videos(arg: Array<string | VideoResult>): Promise<Array<VideoResult>> {
+  public async videos(urls: Array<string>): Promise<Array<VideoResult>>
+  public async videos(videoIds: Array<VideoResult>): Promise<Array<VideoResult>>;
+  public async videos(arg: Array<string | VideoResult>): Promise<Array<VideoResult>> {
     arg = arg.filter(x => !!x);
 
     if (arg.length === 0) {

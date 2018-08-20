@@ -24,7 +24,7 @@ class Tasks {
   }
 
   static get test() {
-    return shell.task('nyc --color -a ava -v');
+    return shell.task('nyc --color -a ava --serial -v');
   }
 
   static get debug() {
