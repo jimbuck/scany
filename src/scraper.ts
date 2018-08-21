@@ -203,9 +203,13 @@ async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Pro
     return result;
 }
 
-/* istanbul ignore next */
 async function createBrowser({ show }: { show: boolean}): Promise<Browser> {
+    let isTravisCI = 'TRAVIS' in process.env && 'CI' in process.env;
+    let args = [];
+    if(isTravisCI) args.push('--no-sandbox');
+    
     return await puppeteer.launch({
+        args,
         headless: !show,
         ignoreHTTPSErrors: true,
         timeout: 0,
