@@ -69,6 +69,7 @@ export class Scraper {
             return title && title.textContent && title.textContent.length > 0;
         });
 
+        /* istanbul ignore next */
         const isV1 = (await page.$('ytd-app')) === null;
 
         let result: PlaylistResult;
@@ -142,7 +143,7 @@ async function _scrapeVideos(browser: Browser, videos: Array<VideoResult>, lastS
         log(`Starting batch ${pageIndex}...`);
         let videos = queue[pageIndex];
         return pSeries(videos, video => {
-            log(`Scraping video ${video.videoId} on page ${pageIndex}...`);
+            log(`Startup page ${pageIndex}...`);
             return _scrapeVideo(page, video.videoId, lastScanned);
         })
     });
@@ -160,6 +161,7 @@ async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Pro
 
     await page.goto(videoUrl);
 
+    /* istanbul ignore next */
     await page.$eval('video', (player: HTMLVideoElement) => player.pause());
 
     /* istanbul ignore next */
@@ -201,6 +203,7 @@ async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Pro
     return result;
 }
 
+/* istanbul ignore next */
 async function createBrowser({ show }: { show: boolean}): Promise<Browser> {
     return await puppeteer.launch({
         headless: !show,

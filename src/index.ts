@@ -14,7 +14,7 @@ export class Scany {
   private _reader: Reader;
 
   constructor({ show, concurrency }: { show?: boolean, concurrency?: number } = {}) {
-    this._scraper = new Scraper({ show: true, concurrency });
+    this._scraper = new Scraper({ show, concurrency });
     this._reader = new Reader();
   }
 

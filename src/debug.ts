@@ -5,7 +5,7 @@ import { Scany } from './';
 
 (async function () {
   log('Starting debug script...');  
-  const scany = new Scany({ concurrency: 2, show: true });
+  const scany = new Scany({ concurrency: 4, show: false });
   
   // const channelResult = await scany.channel('https://www.youtube.com/channel/UCH-_hzb2ILSCo9ftVSnrCIQ');
   let start = Date.now();
