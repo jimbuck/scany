@@ -14,7 +14,7 @@ YouTube provides basic information on users, channels, and playlists via RSS fee
 ## Installation:
 
 ```bash
-npm i --save scany
+npm i scany
 ```
 
 ## Example:
@@ -38,10 +38,10 @@ See `src/models.ts` and `src/debug.ts` for model details and further examples.
 
 ## Features:
  - No configuration necessary!
- - Infers URL type for retrieving .
+ - Uses RSS feed for channels/users and custom screen scraper for videos and playlists.
  - Lightweight API, no OAuth key needed!
  - Automatically creates all available thumbnail URLs for easy use!
- - .
+ - Complete, built-in typescript typings!
 
 ## Caveats/Warnings:
  - Channels only load a maximum of 15 videos at a time. This is a "recent videos" API not a "list videos" API.
