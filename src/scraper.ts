@@ -205,8 +205,7 @@ async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Pro
 
 async function createBrowser({ show }: { show: boolean}): Promise<Browser> {
     let isTravisCI = 'TRAVIS' in process.env && 'CI' in process.env;
-    let args = [];
-    if(isTravisCI) args.push('--no-sandbox');
+    let args = isTravisCI ? ['--no-sandbox'] : [];
     
     return await puppeteer.launch({
         args,

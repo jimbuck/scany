@@ -1,32 +1,243 @@
 
+
+/**
+ * Basic channel data.
+ *
+ * @export
+ * @interface ChannelResult
+ */
 export interface ChannelResult {
+
+  /**
+   * The unique identifier of the channel.
+   *
+   * @type {string}
+   * @memberof ChannelResult
+   */
   channelId: string;
+
+  /**
+   * The display name of the channel.
+   *
+   * @type {string}
+   * @memberof ChannelResult
+   */
   channel: string;
+
+
+  /**
+   * The URL to the channel.
+   *
+   * @type {string}
+   * @memberof ChannelResult
+   */
   channelUrl: string;
+
+
+  /**
+   * List of recent videos uploaded by this channel.
+   *
+   * @type {Array<VideoResult>}
+   * @memberof ChannelResult
+   */
   videos: Array<VideoResult>;
+
+
+  /**
+   * The date and time this channel info was retrieved.
+   *
+   * @type {Date}
+   * @memberof ChannelResult
+   */
   lastScanned: Date;
 }
 
-export interface PlaylistResult extends ChannelResult {
+/**
+ * Basic playlist data.
+ *
+ * @export
+ * @interface PlaylistResult
+ */
+export interface PlaylistResult {
+
+  /**
+   * The unique identifier of the playlist.
+   *
+   * @type {string}
+   * @memberof PlaylistResult
+   */
   playlistId: string;
-  playlist: string;
-  playlistUrl: string;
-}
 
-export interface VideoResult {
-  videoId: string;
-  video: string;
-  videoUrl: string;
-  channel: string;
+
+  /**
+   * The display name of the playlist.
+   *
+   * @type {string}
+   * @memberof PlaylistResult
+   */
+  playlist: string;
+
+  /**
+   * The URL to the playlist.
+   *
+   * @type {string}
+   * @memberof PlaylistResult
+   */
+  playlistUrl: string;
+
+  /**
+   * The unique identifier of the channel that created the playlist.
+   *
+   * @type {string}
+   * @memberof PlaylistResult
+   */
   channelId: string;
+
+  /**
+   * The display name of the channel that created the playlist.
+   *
+   * @type {string}
+   * @memberof PlaylistResult
+   */
+  channel: string;
+
+
+  /**
+   * The URL to the channel that created the playlist.
+   *
+   * @type {string}
+   * @memberof PlaylistResult
+   */
   channelUrl: string;
-  description: string;
-  published: Date;
-  thumbnails: Thumbnails;
-  views: number;
+
+
+  /**
+   * List of videos from this playlist.
+   *
+   * @type {Array<VideoResult>}
+   * @memberof PlaylistResult
+   */
+  videos: Array<VideoResult>;
+
+
+  /**
+   * The date and time this playlist info was retrieved.
+   *
+   * @type {Date}
+   * @memberof PlaylistResult
+   */
   lastScanned: Date;
 }
 
+
+/**
+ * Basic video data.
+ *
+ * @export
+ * @interface VideoResult
+ */
+export interface VideoResult {
+
+  /**
+   * The unqiue identifier of the video.
+   *
+   * @type {string}
+   * @memberof VideoResult
+   */
+  videoId: string;
+
+
+  /**
+   * The title of the video.
+   *
+   * @type {string}
+   * @memberof VideoResult
+   */
+  video: string;
+
+
+  /**
+   * The URL to the video.
+   *
+   * @type {string}
+   * @memberof VideoResult
+   */
+  videoUrl: string;
+
+
+  /**
+   * The display name of the channel who published the video.
+   *
+   * @type {string}
+   * @memberof VideoResult
+   */
+  channel: string;
+
+
+  /**
+   * The unqiue identifier of the channel who published the video.
+   *
+   * @type {string}
+   * @memberof VideoResult
+   */
+  channelId: string;
+
+  /**
+   * The URL of the channel who published the video.
+   *
+   * @type {string}
+   * @memberof VideoResult
+   */
+  channelUrl: string;
+
+  /**
+   * The complete description of the video.
+   *
+   * @type {string}
+   * @memberof VideoResult
+   */
+  description: string;
+
+  /**
+   * The date the video was published (time is not always available).
+   *
+   * @type {Date}
+   * @memberof VideoResult
+   */
+  published: Date;
+
+  /**
+   * The thumbnail URLs for this video.
+   *
+   * @type {Thumbnails}
+   * @memberof VideoResult
+   */
+  thumbnails: Thumbnails;
+
+
+  /**
+   * The total approximate number of views.
+   *
+   * @type {number}
+   * @memberof VideoResult
+   */
+  views: number;
+
+  /**
+   * The date and time this video info was retrieved.
+   *
+   * @type {Date}
+   * @memberof VideoResult
+   */
+  lastScanned: Date;
+}
+
+/**
+ * Collection of various thumbnail URLs.
+ *
+ * @export
+ * @interface Thumbnails
+ */
 export interface Thumbnails {
   
   /**
