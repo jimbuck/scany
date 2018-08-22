@@ -38,7 +38,7 @@ test.serial('e2e - Scany#videos gets multiple videos info', async (t) => {
 
 test.serial('e2e - Scany#playlist gets playlist info', async (t) => {
     let scany = new Scany();
-    const result = await scany.playlist('PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
+    const result = await scany.feed('https://youtube.com/playlist?list=PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
 
     t.truthy(result.channel);
     t.truthy(result.channelId);
@@ -54,7 +54,7 @@ test.serial('e2e - Scany#playlist gets playlist info', async (t) => {
 
 test.serial('e2e - Scany#channel gets channel info', async (t) => {
     let scany = new Scany();
-    const result = await scany.channel('UC6107grRI4m0o2-emgoDnAA');
+    const result = await scany.feed('https://youtube.com/channel/UC6107grRI4m0o2-emgoDnAA');
 
     t.truthy(result.channel);
     t.truthy(result.channelId);

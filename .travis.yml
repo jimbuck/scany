@@ -2,6 +2,8 @@ language: node_js
 node_js:
   - "node"
   - "8"
+addons:
+  chrome: stable
 after_success: npm run coverage
 # deploy:
 #   provider: npm

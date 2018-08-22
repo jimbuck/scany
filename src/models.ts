@@ -1,18 +1,28 @@
 
+export interface ScanResult {
+  /**
+   * The date and time the info was retrieved.
+   *
+   * @type {Date}
+   * @memberof VideoResult
+   */
+  lastScanned: Date;
+}
 
 /**
- * Basic channel data.
+ * Basic channel or playlist data.
  *
  * @export
- * @interface ChannelResult
+ * @interface FeedResult
+ * @extends {ScanResult}
  */
-export interface ChannelResult {
+export interface FeedResult extends ScanResult {
 
   /**
    * The unique identifier of the channel.
    *
    * @type {string}
-   * @memberof ChannelResult
+   * @memberof FeedResult
    */
   channelId: string;
 
@@ -20,123 +30,59 @@ export interface ChannelResult {
    * The display name of the channel.
    *
    * @type {string}
-   * @memberof ChannelResult
+   * @memberof FeedResult
    */
   channel: string;
-
 
   /**
    * The URL to the channel.
    *
    * @type {string}
-   * @memberof ChannelResult
+   * @memberof FeedResult
    */
   channelUrl: string;
 
+  /**
+   * The unique identifier of the playlist. Only popualted if result is a playlist.
+   *
+   * @type {string}
+   * @memberof PlaylistResult
+   */
+  playlistId?: string;
+
+  /**
+   * The display name of the playlist. Only popualted if result is a playlist.
+   *
+   * @type {string}
+   * @memberof PlaylistResult
+   */
+  playlist?: string;
+
+  /**
+   * The URL to the playlist. Only popualted if result is a playlist.
+   *
+   * @type {string}
+   * @memberof PlaylistResult
+   */
+  playlistUrl?: string;
 
   /**
    * List of recent videos uploaded by this channel.
    *
    * @type {Array<VideoResult>}
-   * @memberof ChannelResult
+   * @memberof FeedResult
    */
   videos: Array<VideoResult>;
-
-
-  /**
-   * The date and time this channel info was retrieved.
-   *
-   * @type {Date}
-   * @memberof ChannelResult
-   */
-  lastScanned: Date;
 }
-
-/**
- * Basic playlist data.
- *
- * @export
- * @interface PlaylistResult
- */
-export interface PlaylistResult {
-
-  /**
-   * The unique identifier of the playlist.
-   *
-   * @type {string}
-   * @memberof PlaylistResult
-   */
-  playlistId: string;
-
-
-  /**
-   * The display name of the playlist.
-   *
-   * @type {string}
-   * @memberof PlaylistResult
-   */
-  playlist: string;
-
-  /**
-   * The URL to the playlist.
-   *
-   * @type {string}
-   * @memberof PlaylistResult
-   */
-  playlistUrl: string;
-
-  /**
-   * The unique identifier of the channel that created the playlist.
-   *
-   * @type {string}
-   * @memberof PlaylistResult
-   */
-  channelId: string;
-
-  /**
-   * The display name of the channel that created the playlist.
-   *
-   * @type {string}
-   * @memberof PlaylistResult
-   */
-  channel: string;
-
-
-  /**
-   * The URL to the channel that created the playlist.
-   *
-   * @type {string}
-   * @memberof PlaylistResult
-   */
-  channelUrl: string;
-
-
-  /**
-   * List of videos from this playlist.
-   *
-   * @type {Array<VideoResult>}
-   * @memberof PlaylistResult
-   */
-  videos: Array<VideoResult>;
-
-
-  /**
-   * The date and time this playlist info was retrieved.
-   *
-   * @type {Date}
-   * @memberof PlaylistResult
-   */
-  lastScanned: Date;
-}
-
 
 /**
  * Basic video data.
  *
  * @export
  * @interface VideoResult
+ * @extends {ScanResult}
  */
-export interface VideoResult {
+export interface VideoResult extends ScanResult {
 
   /**
    * The unqiue identifier of the video.
@@ -146,7 +92,6 @@ export interface VideoResult {
    */
   videoId: string;
 
-
   /**
    * The title of the video.
    *
@@ -154,7 +99,6 @@ export interface VideoResult {
    * @memberof VideoResult
    */
   video: string;
-
 
   /**
    * The URL to the video.
@@ -164,7 +108,6 @@ export interface VideoResult {
    */
   videoUrl: string;
 
-
   /**
    * The display name of the channel who published the video.
    *
@@ -172,7 +115,6 @@ export interface VideoResult {
    * @memberof VideoResult
    */
   channel: string;
-
 
   /**
    * The unqiue identifier of the channel who published the video.
@@ -214,7 +156,6 @@ export interface VideoResult {
    */
   thumbnails: Thumbnails;
 
-
   /**
    * The total approximate number of views.
    *
@@ -222,14 +163,6 @@ export interface VideoResult {
    * @memberof VideoResult
    */
   views: number;
-
-  /**
-   * The date and time this video info was retrieved.
-   *
-   * @type {Date}
-   * @memberof VideoResult
-   */
-  lastScanned: Date;
 }
 
 /**
@@ -311,24 +244,4 @@ export interface Thumbnails {
    * @memberOf Thumbnails
    */
   sd?: string;
-}
-
-export function parseThumbnails(videoId: string): Thumbnails {
-  return {
-    background: imageUrl(videoId, '0'),
-    start: imageUrl(videoId, '1'),
-    middle: imageUrl(videoId, '2'),
-    end: imageUrl(videoId, '3'),
-
-    high: imageUrl(videoId, 'hqdefault'),
-    medium: imageUrl(videoId, 'mqdefault'),
-    normal: imageUrl(videoId, 'default'),
-
-    hd: imageUrl(videoId, 'maxresdefault'),
-    sd: imageUrl(videoId, 'sddefault')
-  }
-};  
-
-function imageUrl(videoId: string, image: string): string {
-  return `https://i1.ytimg.com/vi/${videoId}/${image}.jpg`;
 }

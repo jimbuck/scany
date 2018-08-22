@@ -3,8 +3,8 @@ const got = require('got');
 const FeedParser = require('feedparser');
 const get: (<T>(item: any, path: string, defaultValue?: any) => any) = require('lodash.get');
 
-import { ChannelResult, VideoResult, parseThumbnails } from './models';
-import { extractChannelId } from './parser';
+import { FeedResult, VideoResult } from './models';
+import { extractChannelId, parseThumbnails } from './parser';
 
 const log = debug('scany:reader');
 const EMPTY_STRING = '';
@@ -17,26 +17,24 @@ export class Reader {
         this._baseFeedUrl = baseFeedUrl || 'https://www.youtube.com/feeds/videos.xml';
     }
 
-    public async channel(channelId: string): Promise<ChannelResult> {
+    public async channel(channelId: string): Promise<FeedResult> {
         log(`Reading feed for channel ${channelId}...`);
         return _read(`${this._baseFeedUrl}?channel_id=${channelId}`);
     }
 
-    public async user(username: string): Promise<ChannelResult> {
+    public async user(username: string): Promise<FeedResult> {
         log(`Reading feed for user ${username}...`);
         return _read(`${this._baseFeedUrl}?user=${username}`);
     }
 }
 
-async function _read(url: string): Promise<ChannelResult> {
-    let now = new Date();
-
-    let channelResult: ChannelResult = {
+async function _read(url: string): Promise<FeedResult> {
+    let channelResult: FeedResult = {
         channelId: null,
         channel: null,
         channelUrl: null,
         videos: [],
-        lastScanned: now
+        lastScanned: new Date()
     };
 
     await _downloadData(url, (meta) => {
@@ -47,7 +45,6 @@ async function _read(url: string): Promise<ChannelResult> {
         video.channel = channelResult.channel;
         video.channelId = channelResult.channelId;
         video.channelUrl = channelResult.channelUrl;
-        video.lastScanned = now;
         channelResult.videos.push(video);
     });
 
@@ -76,7 +73,7 @@ function _downloadData(url: string, onMeta: (meta: any) => void, onVideo: (data:
                         published: item.pubDate,
                         thumbnails: parseThumbnails(videoId),
                         views: parseInt(get(item, 'media:group.media:community.media:statistics.@.views'), 10),
-                        lastScanned: null
+                        lastScanned: new Date()
                     };
 
                     onVideo(video);

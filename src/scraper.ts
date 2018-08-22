@@ -1,11 +1,12 @@
 import * as puppeteer from 'puppeteer';
 import { Browser, Page } from 'puppeteer';
 import * as scrapeIt from 'scrape-it';
+const locateChrome = require('locate-chrome');
 import * as debug from 'debug';
 let log = debug('scany:scraper');
 
-import { PlaylistResult, VideoResult } from './models';
-import { extractChannelId, extractVideoId, createPlaylistUrl, createVideoUrl } from './parser';
+import { FeedResult, VideoResult } from './models';
+import { extractChannelId, extractVideoId, createPlaylistUrl, createVideoUrl, parseThumbnails, extractUsername } from './parser';
 import { queueUp, pTimes, pSeries, pParallel } from './utils';
 
 const EMPTY_STRING = '';
@@ -44,14 +45,14 @@ export class Scraper {
 
         const browser = await createBrowser({show: this._show});
 
-        let videoResults = await _scrapeVideos(browser, videos, now);
+        let videoResults = await _scrapeVideos(browser, videos, now, this._concurrency);
 
         await browser.close();
 
         return videoResults;
     }
 
-    public async playlist(playlistId: string, videoIdsOnly: boolean = false): Promise<PlaylistResult> {
+    public async playlist(playlistId: string, includeVideos: boolean = true): Promise<FeedResult> {
         let now = new Date();
         log(`Scraping playlist '${playlistId}'...`);
 
@@ -72,7 +73,7 @@ export class Scraper {
         /* istanbul ignore next */
         const isV1 = (await page.$('ytd-app')) === null;
 
-        let result: PlaylistResult;
+        let result: FeedResult;
 
         if (isV1) {
             throw new Error('Older YouTube page format not supported (yet)!');
@@ -100,7 +101,7 @@ export class Scraper {
             /* istanbul ignore next */
             const html = await page.content();
 
-            result = await scrapeIt.scrapeHTML<PlaylistResult>(html, {
+            result = await scrapeIt.scrapeHTML<FeedResult>(html, {
                 playlist: '#title',
                 playlistId: '#stats > yt-formatted-string:nth-child(1)',
                 channel: '#owner-name a',
@@ -111,7 +112,23 @@ export class Scraper {
                         videoId: {
                             selector: '#content > a',
                             attr: 'href',
-                            convert: url => extractVideoId(url)
+                            convert: extractVideoId
+                        },
+                        video: '#video-title',
+                        videoUrl: {
+                            selector: '#content > a',
+                            attr: 'href'
+                        },
+                        channel: '#byline > a',
+                        channelUrl: {
+                            selector: '#byline > a',
+                            attr: 'href',
+                            convert: makeAbsolute
+                        },
+                        channelId: {
+                            selector: '#byline > a',
+                            attr: 'href',
+                            convert: url => extractChannelId(url) || extractUsername(url)
                         }
                     }
                 }
@@ -123,7 +140,7 @@ export class Scraper {
         result.playlistUrl = playlistUrl;
         result.channelId = extractChannelId(result.channelUrl);
 
-        if (!videoIdsOnly) {
+        if (includeVideos) {
             log(`Retrieving video data...`);
             result.videos = await _scrapeVideos(browser, result.videos, now, this._concurrency);
         }
@@ -198,6 +215,7 @@ async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Pro
     result.videoId = videoId;
     result.videoUrl = videoUrl;
     result.channelId = extractChannelId(result.channelUrl);
+    result.thumbnails = parseThumbnails(videoId);
     result.lastScanned = lastScanned;
 
     return result;
@@ -206,8 +224,11 @@ async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Pro
 async function createBrowser({ show }: { show: boolean}): Promise<Browser> {
     let isTravisCI = 'TRAVIS' in process.env && 'CI' in process.env;
     let args = isTravisCI ? ['--no-sandbox'] : [];
+
+    let chromePath: string = await locateChrome();
     
     return await puppeteer.launch({
+        executablePath: chromePath,
         args,
         headless: !show,
         ignoreHTTPSErrors: true,

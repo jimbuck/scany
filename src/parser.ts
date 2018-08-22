@@ -1,6 +1,7 @@
 import { parse } from 'url';
-
 import * as UrlPattern from 'url-pattern';
+
+import { Thumbnails } from './models';
 
 const userPattern = new UrlPattern('/user/:username');
 const channelPattern = new UrlPattern('/channel/:channelId');
@@ -57,4 +58,28 @@ export function createPlaylistUrl(playlistId: string): string {
 
 export function createVideoUrl(videoId: string): string {
     return `https://www.youtube.com/watch?v=${videoId}`;
+}
+
+export function parseThumbnails(videoId: string): Thumbnails {
+    return {
+        background: imageUrl(videoId, '0'),
+        start: imageUrl(videoId, '1'),
+        middle: imageUrl(videoId, '2'),
+        end: imageUrl(videoId, '3'),
+
+        high: imageUrl(videoId, 'hqdefault'),
+        medium: imageUrl(videoId, 'mqdefault'),
+        normal: imageUrl(videoId, 'default'),
+
+        hd: imageUrl(videoId, 'maxresdefault'),
+        sd: imageUrl(videoId, 'sddefault')
+    }
+};
+
+function imageUrl(videoId: string, image: string): string {
+    return `https://i1.ytimg.com/vi/${videoId}/${image}.jpg`;
+}
+
+function padZeros(numStr: string): string {
+    return `00${numStr || ''}`.slice(-2);
 }
