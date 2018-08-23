@@ -25,27 +25,25 @@ export class Scany {
     this._reader = new Reader();
   }
 
-  public async feed(url: string, includeVideos: boolean = true): Promise<FeedResult> {
+  public async feed(url: string): Promise<FeedResult> {
     let videoId = extractVideoId(url);
     if (videoId) return Promise.reject(`A video URL (${url}) was provided, use Scany#fetchVideo instead.`)
     
     let username = extractUsername(url);
     if (username) {
       const result = await this._reader.user(username);
-      if (includeVideos) result.videos = await this.videos(result.videos.map(v => v.videoId));
       return result;
     }
 
     let playlistId = extractPlaylistId(url);
     if (playlistId) {
       if (playlistId === 'WL') return Promise.reject('Watch Later playlists are not supported!');
-      return this._scraper.playlist(playlistId, includeVideos);
+      return this._scraper.playlist(playlistId);
     }
 
     let channelId = extractChannelId(url);
     if (channelId) {
       const result = await this._reader.channel(channelId);
-      if (includeVideos) result.videos = await this.videos(result.videos.map(v => v.videoId));
       return result;
     }
     
@@ -57,40 +55,33 @@ export class Scany {
    *
    * @param {string} urlOrId The video id or the full URL to the video.
    */
-  public async video(urlOrId: string): Promise<VideoResult> {
-    const videoId = extractVideoId(urlOrId) || urlOrId;
-
-    if (!videoId) {
-      return Promise.reject(`URL ${urlOrId} does not reference a video!`);
-    }
-
-    return this._scraper.video(videoId);
-  }
-
+  public async video(urlOrId: string): Promise<VideoResult>;
   /**
    * Retrieves video data for multiple videos.
    *
    * @param {Array<string>} urlsOrIds List of video URLs or video ids.
    */
-  public async videos(urlsOrIds: Array<string>): Promise<Array<VideoResult>> {
-    urlsOrIds = urlsOrIds.filter(x => !!x);
+  public async video(urlsOrIds: Array<string>): Promise<Array<VideoResult>>;
+  public async video(urlsOrIds: string | Array<string>): Promise<VideoResult | Array<VideoResult>> {
+    let videoIds = [];
+    if (typeof urlsOrIds === 'string') {
+      videoIds = [extractVideoId(urlsOrIds) || urlsOrIds];
+    } else {
+      videoIds = urlsOrIds.map(id => extractVideoId(id) || id).filter(x => !!x);
+    }
 
-    if (urlsOrIds.length === 0) {
+    if (videoIds.length === 0) {
       return Promise.reject(`No valid video URLs were found!`);
     }
 
-    log(`Converting ${urlsOrIds.length} video URLs to video Ids...`);
-    let videoUrls = urlsOrIds as Array<string>;
-    let videoIds = videoUrls.map(id => extractVideoId(id) || id).filter(id => !!id);
-    
-    if (videoIds.length === 0) {
-      return Promise.reject(`No valid videoIds were found!`);
+    log(`Converting ${videoIds.length} video URLs to video Ids...`);
+
+    const results = await this._scraper.videos(videoIds);
+
+    if (typeof urlsOrIds === 'string') {
+      return results[0];
+    } else {
+      return results;
     }
-
-    return this._scraper.videos(videoIds);
-  }
-
-  public async batch(batchFn: (s: any) => Promise<void>): Promise<void> {
-
   }
 }

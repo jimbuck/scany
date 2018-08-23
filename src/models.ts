@@ -138,7 +138,7 @@ export interface VideoResult extends ScanResult {
    * @type {string}
    * @memberof VideoResult
    */
-  description: string;
+  description?: string;
 
   /**
    * The date the video was published (time is not always available).
@@ -146,7 +146,7 @@ export interface VideoResult extends ScanResult {
    * @type {Date}
    * @memberof VideoResult
    */
-  published: Date;
+  published?: Date;
 
   /**
    * The thumbnail URLs for this video.
@@ -162,7 +162,7 @@ export interface VideoResult extends ScanResult {
    * @type {number}
    * @memberof VideoResult
    */
-  views: number;
+  views?: number;
 }
 
 /**
@@ -177,71 +177,71 @@ export interface Thumbnails {
    * Player background thumbnail (480x360).
    * 
    * @type {string}
-   * @memberOf Thumbnails
+   * @memberof Thumbnails
    */
   background: string;
 
   /**
-   * Start thumbnail (120x90).
+   * Normal quality thumbnail from start of video (120x90).
    * 
    * @type {string}
-   * @memberOf Thumbnails
+   * @memberof Thumbnails
    */
   start: string;
 
   /**
-   * Middle thumbnail (120x90).
+   * Middle of video thumbnail (120x90).
    * 
    * @type {string}
-   * @memberOf Thumbnails
+   * @memberof Thumbnails
    */
   middle: string;
 
   /**
-   * End thumbnail (120x90).
+   * Normal quality thumbnail from end of video. (120x90).
    * 
    * @type {string}
-   * @memberOf Thumbnails
+   * @memberof Thumbnails
    */
   end: string;
   
   /**
-   * High thumbnail (480x360).
+   * High quality thumbnail (480x360).
    * 
    * @type {string}
-   * @memberOf Thumbnails
+   * @memberof Thumbnails
    */
   high: string;
 
   /**
-   * Medium thumbnail (320x180).
+   * Medium quality thumbnail (320x180).
    * 
    * @type {string}
-   * @memberOf Thumbnails
+   * @memberof Thumbnails
    */
   medium: string;
 
   /**
-   * Normal thumbnail (120x90).
+   * Normal quality thumbnail (120x90).
    * 
    * @type {string}
-   * @memberOf Thumbnails
+   * @memberof Thumbnails
    */
   normal: string;
 
   /**
-   * HD-only maximum resolution thumbnail (1280x720 or 1920x1080).
+   * HD quality thumbnail (maximum resolution). Only present on 720p+ videos.
    * 
    * @type {string}
-   * @memberOf Thumbnails
+   * @memberof Thumbnails
    */  
   hd?: string;
   
   /**
-   * HD-only standard resolution thumbnail (640x480).
-   * 
+   * SD quality thumbnail (640x480).  Only present on 480p+ videos.
+   *
    * @type {string}
-   * @memberOf Thumbnails
+   * @memberof Thumbnails
    */
   sd?: string;
 }

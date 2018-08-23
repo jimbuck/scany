@@ -2,7 +2,7 @@ import { test } from 'ava';
 
 import { Scany } from './';
 
-test.serial('e2e - Scany#video gets video info', async (t) => {
+test('e2e - Scany#video gets video info', async (t) => {
     let scany = new Scany();
     const result = await scany.video('DEVi0mEaJJQ');
 
@@ -18,9 +18,9 @@ test.serial('e2e - Scany#video gets video info', async (t) => {
     t.is(typeof result.views, 'number');
 });
 
-test.serial('e2e - Scany#videos gets multiple videos info', async (t) => {
+test('e2e - Scany#videos gets multiple videos info', async (t) => {
     let scany = new Scany();
-    const results = await scany.videos(['OFbBs9M0cqw', 'beaHxW5o-uw']);
+    const results = await scany.video(['https://youtube.com/watch?v=OFbBs9M0cqw', 'beaHxW5o-uw']);
 
     results.forEach(result => {
         t.truthy(result.video);
@@ -36,7 +36,7 @@ test.serial('e2e - Scany#videos gets multiple videos info', async (t) => {
     });
 });
 
-test.serial('e2e - Scany#playlist gets playlist info', async (t) => {
+test('e2e - Scany#playlist gets playlist info', async (t) => {
     let scany = new Scany();
     const result = await scany.feed('https://youtube.com/playlist?list=PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
 
@@ -52,7 +52,7 @@ test.serial('e2e - Scany#playlist gets playlist info', async (t) => {
     result.videos.forEach(video => t.truthy(video.videoId));
 });
 
-test.serial('e2e - Scany#channel gets channel info', async (t) => {
+test('e2e - Scany#channel gets channel info', async (t) => {
     let scany = new Scany();
     const result = await scany.feed('https://youtube.com/channel/UC6107grRI4m0o2-emgoDnAA');
 

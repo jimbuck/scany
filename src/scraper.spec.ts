@@ -2,7 +2,7 @@ import { test } from 'ava';
 
 import { Scraper } from './scraper';
 
-test.serial('Scraper#video gets video info', async (t) => {
+test('Scraper#video gets video info', async (t) => {
     let scraper = new Scraper();
     const result = await scraper.video('DEVi0mEaJJQ');
 
@@ -18,7 +18,7 @@ test.serial('Scraper#video gets video info', async (t) => {
     t.is(typeof result.views, 'number');
 });
 
-test.serial('Scraper#videos gets multiple videos info', async (t) => {
+test('Scraper#videos gets multiple videos info', async (t) => {
     let scraper = new Scraper();
 
     const results = await scraper.videos(['OFbBs9M0cqw', 'beaHxW5o-uw']);
@@ -37,7 +37,7 @@ test.serial('Scraper#videos gets multiple videos info', async (t) => {
     });
 });
 
-test.serial('Scraper#playlist gets playlist info', async (t) => {
+test('Scraper#playlist gets playlist info', async (t) => {
     let scraper = new Scraper();
 
     const result = await scraper.playlist('PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
@@ -51,5 +51,14 @@ test.serial('Scraper#playlist gets playlist info', async (t) => {
     t.true(result.lastScanned instanceof Date);
     t.true(result.videos.length > 0);
 
-    result.videos.forEach(video => t.truthy(video.videoId));
+    result.videos.forEach(v => {
+        t.truthy(v.video);
+        t.truthy(v.videoId);
+        t.truthy(v.videoUrl);
+        t.truthy(v.channel);
+        t.truthy(v.channelId);
+        t.truthy(v.channelUrl);
+        t.truthy(v.thumbnails.high);
+        t.true(v.lastScanned instanceof Date);
+    });
 });

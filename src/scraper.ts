@@ -52,7 +52,7 @@ export class Scraper {
         return videoResults;
     }
 
-    public async playlist(playlistId: string, includeVideos: boolean = true): Promise<FeedResult> {
+    public async playlist(playlistId: string): Promise<FeedResult> {
         let now = new Date();
         log(`Scraping playlist '${playlistId}'...`);
 
@@ -139,11 +139,10 @@ export class Scraper {
         result.playlistId = playlistId;
         result.playlistUrl = playlistUrl;
         result.channelId = extractChannelId(result.channelUrl);
-
-        if (includeVideos) {
-            log(`Retrieving video data...`);
-            result.videos = await _scrapeVideos(browser, result.videos, now, this._concurrency);
-        }
+        result.videos.forEach(v => {
+            v.thumbnails = parseThumbnails(v.videoId);
+            v.lastScanned = now;
+        });
 
         await browser.close();
 
