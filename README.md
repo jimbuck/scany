@@ -54,6 +54,7 @@ See `src/models.ts` for model definitions and `src/debug.ts` for working example
 
 ## Caveats/Warnings
 
+- **Chrome is required!** Chrome has certain media codecs that are required for some pages to render correctly.
 - Channels only load a maximum of 15 videos at a time. This is a "recent videos" API not a "list videos" API.
 - Playlist data will only include basic data for each video. See optional properties on `VideoResult` for details.
 - Don't spam these commands, one endpoint only needs to be fetched every few hours at most (24 hours should be sufficient for most applications).
