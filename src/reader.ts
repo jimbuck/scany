@@ -31,18 +31,19 @@ export class Reader {
 async function _read(url: string): Promise<FeedResult> {
     let channelResult: FeedResult = {
         channelId: null,
-        channel: null,
+        channelName: null,
         channelUrl: null,
         videos: [],
         lastScanned: new Date()
     };
 
     await _downloadData(url, (meta) => {
-        channelResult.channel = meta.author;
+        channelResult.channelName = meta.author;
         channelResult.channelUrl = meta.link;
         channelResult.channelId = extractChannelId(channelResult.channelUrl);
     }, (video) => {
-        video.channel = channelResult.channel;
+        video.lastScanned = channelResult.lastScanned;
+        video.channelName = channelResult.channelName;
         video.channelId = channelResult.channelId;
         video.channelUrl = channelResult.channelUrl;
         channelResult.videos.push(video);
@@ -64,16 +65,16 @@ function _downloadData(url: string, onMeta: (meta: any) => void, onVideo: (data:
                     const videoId = get(item, 'yt:videoid.#');
                     const video: VideoResult = {
                         videoId,
-                        video: item.title,
+                        videoTitle: item.title,
                         videoUrl: item.link,
-                        channel: null,
+                        channelName: null,
                         channelId: null,
                         channelUrl: null,
                         description: get(item, 'media:group.media:description.#', EMPTY_STRING),
                         published: item.pubDate,
                         thumbnails: parseThumbnails(videoId),
                         views: parseInt(get(item, 'media:group.media:community.media:statistics.@.views'), 10),
-                        lastScanned: new Date()
+                        lastScanned: null
                     };
 
                     onVideo(video);

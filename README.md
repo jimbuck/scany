@@ -35,14 +35,14 @@ let playlist = await scany.feed('https://www.youtube.com/playlist?list=PLjHf9jaF
 // Optionally retrieve more data (description, views, publish date, etc.) for each video:
 playlist.videos = await scany.video(playlist.videos.map(v => v.videoId));
 
-console.log(`${playlist.playlist} by ${playlist.channel}:`);
-playlist.videos.forEach((v, i) => {
-  console.log(`${i}. ${v.video} (${v.channel})`);
+console.log(`${playlist.playlistTitle} by ${playlist.channelName}:`);
+playlist.videos.forEach((video, i) => {
+  console.log(`[${i}] ${video.videoTitle} (${video.channelName})`);
 });
 
 ```
 
-See `src/models.ts` and `src/debug.ts` for model details and further examples.
+See `src/models.ts` for model definitions and `src/debug.ts` for working examples.
 
 ## Features
 

@@ -102,9 +102,9 @@ export class Scraper {
             const html = await page.content();
 
             result = await scrapeIt.scrapeHTML<FeedResult>(html, {
-                playlist: '#title',
+                playlistTitle: '#title',
                 playlistId: '#stats > yt-formatted-string:nth-child(1)',
-                channel: '#owner-name a',
+                channelName: '#owner-name a',
                 channelUrl: { selector: '#owner-name a', attr: 'href', convert: makeAbsolute },
                 videos: {
                     listItem: '#contents > ytd-playlist-video-renderer',
@@ -114,12 +114,12 @@ export class Scraper {
                             attr: 'href',
                             convert: extractVideoId
                         },
-                        video: '#video-title',
+                        videoTitle: '#video-title',
                         videoUrl: {
                             selector: '#content > a',
                             attr: 'href'
                         },
-                        channel: '#byline > a',
+                        channelName: '#byline > a',
                         channelUrl: {
                             selector: '#byline > a',
                             attr: 'href',
@@ -143,6 +143,8 @@ export class Scraper {
             v.thumbnails = parseThumbnails(v.videoId);
             v.lastScanned = now;
         });
+
+        await page.close();
 
         await browser.close();
 
@@ -196,8 +198,8 @@ async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Pro
         throw new Error('Older YouTube page format not supported (yet)!');
     } else {
         result = await scrapeIt.scrapeHTML<VideoResult>(html, {
-            video: 'h1.title',
-            channel: '#owner-name a',
+            videoTitle: 'h1.title',
+            channelName: '#owner-name a',
             channelUrl: { selector: '#owner-name a', attr: 'href', convert: makeAbsolute },
             description: '#description',
             published: {

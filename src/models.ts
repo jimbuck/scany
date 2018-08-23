@@ -32,7 +32,7 @@ export interface FeedResult extends ScanResult {
    * @type {string}
    * @memberof FeedResult
    */
-  channel: string;
+  channelName: string;
 
   /**
    * The URL to the channel.
@@ -56,7 +56,7 @@ export interface FeedResult extends ScanResult {
    * @type {string}
    * @memberof PlaylistResult
    */
-  playlist?: string;
+  playlistTitle?: string;
 
   /**
    * The URL to the playlist. Only popualted if result is a playlist.
@@ -98,7 +98,7 @@ export interface VideoResult extends ScanResult {
    * @type {string}
    * @memberof VideoResult
    */
-  video: string;
+  videoTitle: string;
 
   /**
    * The URL to the video.
@@ -114,7 +114,7 @@ export interface VideoResult extends ScanResult {
    * @type {string}
    * @memberof VideoResult
    */
-  channel: string;
+  channelName: string;
 
   /**
    * The unqiue identifier of the channel who published the video.
