@@ -1,6 +1,6 @@
 {
   "name": "scany",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Easily grab video data from user, channel, playlist, and video URLs!",
   "main": "index.js",
   "types": "./dist/index.d.ts",
@@ -13,8 +13,7 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "preversion": "npm test",
     "version": "git add -A",
-    "postversion": "git push && git push --tags && npm publish",
-    "preinstall": "cross-env PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true"
+    "postversion": "git push && git push --tags && npm publish"
   },
   "repository": {
     "type": "git",
@@ -41,11 +40,9 @@
     "yargs": "^12.0.1"
   },
   "dependencies": {
-    "cross-env": "^5.2.0",
     "debug": "^3.1.0",
     "feedparser": "^2.2.9",
     "got": "^9.0.0",
-    "locate-chrome": "^0.1.1",
     "lodash.get": "^4.4.2",
     "puppeteer": "^1.7.0",
     "scrape-it": "^5.0.5",

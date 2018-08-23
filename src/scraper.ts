@@ -1,7 +1,6 @@
 import * as puppeteer from 'puppeteer';
 import { Browser, Page } from 'puppeteer';
 import * as scrapeIt from 'scrape-it';
-const locateChrome = require('locate-chrome');
 import * as debug from 'debug';
 let log = debug('scany:scraper');
 
@@ -225,11 +224,8 @@ async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Pro
 async function createBrowser({ show }: { show: boolean}): Promise<Browser> {
     let isTravisCI = 'TRAVIS' in process.env && 'CI' in process.env;
     let args = isTravisCI ? ['--no-sandbox'] : [];
-
-    let chromePath: string = await locateChrome();
     
     return await puppeteer.launch({
-        executablePath: chromePath,
         args,
         headless: !show,
         ignoreHTTPSErrors: true,
