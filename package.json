@@ -48,7 +48,6 @@
     "url-pattern": "^1.0.2"
   },
   "ava": {
-    "serial": true,
     "files": [
       "./dist/**/*.spec.js"
     ],
