@@ -4,8 +4,7 @@ import * as scrapeIt from 'scrape-it';
 import * as debug from 'debug';
 let log = debug('scany:scraper');
 
-import { FeedResult, VideoResult } from './models';
-import { extractChannelId, extractVideoId, createPlaylistUrl, createVideoUrl, parseThumbnails, extractUsername } from './parser';
+import { FeedResult, VideoResult, createThumbnails, extractChannelId, extractVideoId, createPlaylistUrl, createVideoUrl, extractUsername } from 'pully-core';
 import { queueUp, pTimes, pSeries, pParallel } from './utils';
 
 const EMPTY_STRING = '';
@@ -139,7 +138,7 @@ export class Scraper {
         result.playlistUrl = playlistUrl;
         result.channelId = extractChannelId(result.channelUrl);
         result.videos.forEach(v => {
-            v.thumbnails = parseThumbnails(v.videoId);
+            v.thumbnails = createThumbnails(v.videoId);
             v.lastScanned = now;
         });
 
@@ -215,7 +214,7 @@ async function _scrapeVideo(page: Page, videoId: string, lastScanned: Date): Pro
     result.videoId = videoId;
     result.videoUrl = videoUrl;
     result.channelId = extractChannelId(result.channelUrl);
-    result.thumbnails = parseThumbnails(videoId);
+    result.thumbnails = createThumbnails(videoId);
     result.lastScanned = lastScanned;
 
     return result;

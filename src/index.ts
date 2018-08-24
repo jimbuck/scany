@@ -1,10 +1,9 @@
 import * as debug from 'debug';
 const log = debug('scany');
 
-import { FeedResult, VideoResult, Thumbnails } from './models';
+import { FeedResult, VideoResult, Thumbnails, extractChannelId, extractPlaylistId, extractUsername, extractVideoId } from 'pully-core';
 import { Scraper } from './scraper';
 import { Reader } from './reader';
-import { extractChannelId, extractPlaylistId, extractVideoId, extractUsername } from './parser';
 
 export { FeedResult, VideoResult, Thumbnails };
 

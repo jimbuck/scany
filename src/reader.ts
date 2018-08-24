@@ -1,10 +1,9 @@
 import * as debug from 'debug';
 const got = require('got');
 const FeedParser = require('feedparser');
-const get: (<T>(item: any, path: string, defaultValue?: any) => any) = require('lodash.get');
+const get: (<T>(item: any, path: string, defaultValue?: T) => T) = require('lodash.get');
 
-import { FeedResult, VideoResult } from './models';
-import { extractChannelId, parseThumbnails } from './parser';
+import { FeedResult, VideoResult, createThumbnails, extractChannelId } from 'pully-core';
 
 const log = debug('scany:reader');
 const EMPTY_STRING = '';
@@ -62,7 +61,7 @@ function _downloadData(url: string, onMeta: (meta: any) => void, onVideo: (data:
             .on('readable', function () {
                 let item: any;
                 while (item = this.read()) {
-                    const videoId = get(item, 'yt:videoid.#');
+                    const videoId = get<string>(item, 'yt:videoid.#');
                     const video: VideoResult = {
                         videoId,
                         videoTitle: item.title,
@@ -70,10 +69,10 @@ function _downloadData(url: string, onMeta: (meta: any) => void, onVideo: (data:
                         channelName: null,
                         channelId: null,
                         channelUrl: null,
-                        description: get(item, 'media:group.media:description.#', EMPTY_STRING),
+                        description: get<string>(item, 'media:group.media:description.#', EMPTY_STRING),
                         published: item.pubDate,
-                        thumbnails: parseThumbnails(videoId),
-                        views: parseInt(get(item, 'media:group.media:community.media:statistics.@.views'), 10),
+                        thumbnails: createThumbnails(videoId),
+                        views: parseInt(get<string>(item, 'media:group.media:community.media:statistics.@.views'), 10),
                         lastScanned: null
                     };
 
