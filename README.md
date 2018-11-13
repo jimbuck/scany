@@ -8,7 +8,7 @@
 [![Monthly Downloads](https://img.shields.io/npm/dm/scany.svg?style=flat-square)](https://www.npmjs.com/package/scany)
 [![Total Downloads](https://img.shields.io/npm/dt/scany.svg?style=flat-square)](https://www.npmjs.com/package/scany)
 
-YouTube provides basic information on users, channels, and playlists via RSS feeds. This module makes it incredibly easy to access that data without requiring an API key! Not having to sign up for something new is great for hackathons and small projects. If more information is required, then the official YouTube API is recommended.
+YouTube provides basic information on users, channels, and playlists via RSS feeds. This module makes it incredibly easy to access that data without requiring an API key! Not having to sign up for something new is great for hackathons and small projects.
 
 ## Installation
 
@@ -19,21 +19,14 @@ npm i scany
 ## Example
 
 ```ts
-import { Scany } from 'scany';
+import { scanFeed, scanVideo } from 'scany';
 
-const scany = new Scany();
+let singleVideo = await scanVideo('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+let multipleVideos = await scanVideo(['OFbBs9M0cqw', 'https://www.youtube.com/watch?v=beaHxW5o-uw']);
 
-let channelViaUser = await scany.feed('https://www.youtube.com/user/freddiew');
-
-let channelViaChannelId = await scany.feed('https://www.youtube.com/channel/UCG08EqOAXJk_YXPDsAvReSg');
-
-let singleVideo = await scany.video('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-
-let multipleVideos = await scany.video(['OFbBs9M0cqw', 'https://www.youtube.com/watch?v=beaHxW5o-uw']);
-
-let playlist = await scany.feed('https://www.youtube.com/playlist?list=PLjHf9jaFs8XUXBnlkBAuRkOpUJosxJ0Vx');
-// Optionally retrieve more data (description, views, publish date, etc.) for each video:
-playlist.videos = await scany.video(playlist.videos.map(v => v.videoId));
+let channelViaUser = await scanFeed('https://www.youtube.com/user/freddiew');
+let channelViaChannelId = await scanFeed('https://www.youtube.com/channel/UCG08EqOAXJk_YXPDsAvReSg');
+let playlist = await scanFeed('https://www.youtube.com/playlist?list=PLjHf9jaFs8XUXBnlkBAuRkOpUJosxJ0Vx');
 
 console.log(`${playlist.playlistTitle} by ${playlist.channelName}:`);
 playlist.videos.forEach((video, i) => {
@@ -42,21 +35,13 @@ playlist.videos.forEach((video, i) => {
 
 ```
 
-See `src/models.ts` for model definitions and `src/debug.ts` for working examples.
-
 ## Features
 
 - No configuration necessary!
-- Uses RSS feed for channels/users and custom screen scraper for videos and playlists.
-- Lightweight API, no OAuth key needed!
+- Scrapes the web for channels/users/playlists and reads meta data directly from the video feeds.
+- Anonymous API, no OAuth key needed!
 - Automatically creates all available thumbnail URLs for easy use!
 - Complete, built-in typescript typings!
-
-## Caveats/Warnings
-
-- Channels only load a maximum of 15 videos at a time. This is a "recent videos" API not a "list videos" API.
-- Playlist data will only include basic data for each video. See optional properties on `VideoResult` for details.
-- Don't spam these commands, one endpoint only needs to be fetched every few hours at most (24 hours should be sufficient for most applications).
 
 ## Related
 

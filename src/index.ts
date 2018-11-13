@@ -1,86 +1,92 @@
 import * as debug from 'debug';
-const log = debug('scany');
+import * as ytpl from 'ytpl';
+import pMap from 'p-map';
+import { FeedResult, Thumbnails, extractPlaylistId, extractVideoId, query, VideoResult } from 'pully-core';
 
-import { FeedResult, VideoResult, Thumbnails, extractChannelId, extractPlaylistId, extractUsername, extractVideoId } from 'pully-core';
-import { Scraper } from './scraper';
-import { Reader } from './reader';
+const log = debug('scany');
+const DEFAULT_CONCURRENCY = 8;
+const DEFAULT_CHANNEL_LIMIT = 10;
 
 export { FeedResult, VideoResult, Thumbnails };
 
+export async function scanFeed(url: string, opts?: {limit?: number, concurrency?: number}): Promise<FeedResult> {
+  const now = new Date();
+
+  let videoId = extractVideoId(url);
+  if (videoId) throw new Error(`A video URL (${url}) was provided, use Scany#fetchVideo instead.`);
+
+  let playlistId = extractPlaylistId(url);
+  if (playlistId && playlistId === 'WL') {
+    throw new Error('Watch Later playlists are not supported!');
+  }
+
+  opts = Object.assign({
+    limit: playlistId ? Number.MAX_SAFE_INTEGER : DEFAULT_CHANNEL_LIMIT,
+    concurrency: DEFAULT_CONCURRENCY
+  }, opts);
+
+  log(`Querying feed '${url}'...`);
+
+  const plResult = await ytpl(url, { limit: opts.limit });
+  return {
+    lastScanned: now,
+    channelId: plResult.author.id,
+    channelName: plResult.author.name,
+    channelUrl: plResult.author.channel_url,
+    playlistId: plResult.id,
+    playlistTitle: plResult.title,
+    playlistUrl: plResult.url,
+    videos: await pMap(plResult.items, async (v) => {
+
+      const vidResult = await query(v.url_simple);
+      
+      // Hard delete bloated data (just use pully-core if it is needed)
+      delete vidResult.formats;
+      delete vidResult.raw;
+
+      return Object.assign({
+        videoId: v.id,
+        videoTitle: v.title,
+        videoUrl: v.url_simple,
+        channelName: v.author.name,
+        channelId: v.author.id,
+        channelUrl: v.author.channel_url,
+      } as VideoResult, vidResult);
+    }, { concurrency: opts.concurrency })
+  };
+}
+
 /**
- * Youtube scraper and feed reader that provides access to channel, playlist, and video data.
+ * Retrieves video data.
+ *
+ * @param {string} urlOrId The video id or the full URL to the video.
  */
-export class Scany {
-
-  private _scraper: Scraper;
-  private _reader: Reader;
-
-  /**
-   * Creates an instance of Scany.
-   * @param {{ show?: boolean, concurrency?: number }} [{ show, concurrency }={}]
-   */
-  constructor({ show, concurrency }: { show?: boolean, concurrency?: number } = {}) {
-    this._scraper = new Scraper({ show, concurrency });
-    this._reader = new Reader();
+export async function scanVideo(urlOrId: string): Promise<VideoResult>;
+/**
+ * Retrieves video data for multiple videos.
+ *
+ * @param {Array<string>} urlsOrIds List of video URLs or video ids.
+ */
+export async function scanVideo(urlsOrIds: Array<string>, concurrency?: number): Promise<Array<VideoResult>>;
+export async function scanVideo(urlsOrIds: string | Array<string>, concurrency: number = DEFAULT_CONCURRENCY): Promise<VideoResult | Array<VideoResult>> {
+  let videoIds = [];
+  if (typeof urlsOrIds === 'string') {
+    videoIds = [extractVideoId(urlsOrIds) || urlsOrIds];
+  } else {
+    videoIds = urlsOrIds.map(id => extractVideoId(id) || id).filter(x => !!x);
   }
 
-  public async feed(url: string): Promise<FeedResult> {
-    let videoId = extractVideoId(url);
-    if (videoId) return Promise.reject(`A video URL (${url}) was provided, use Scany#fetchVideo instead.`)
-    
-    let username = extractUsername(url);
-    if (username) {
-      const result = await this._reader.user(username);
-      return result;
-    }
-
-    let playlistId = extractPlaylistId(url);
-    if (playlistId) {
-      if (playlistId === 'WL') return Promise.reject('Watch Later playlists are not supported!');
-      return this._scraper.playlist(playlistId);
-    }
-
-    let channelId = extractChannelId(url);
-    if (channelId) {
-      const result = await this._reader.channel(channelId);
-      return result;
-    }
-    
-    return Promise.reject(`The provided URL (${url}) is not a supported YouTube link (channel, user, or playlist)!`);
+  if (videoIds.length === 0) {
+    return Promise.reject(`No valid video URLs were found!`);
   }
 
-  /**
-   * Retrieves video data.
-   *
-   * @param {string} urlOrId The video id or the full URL to the video.
-   */
-  public async video(urlOrId: string): Promise<VideoResult>;
-  /**
-   * Retrieves video data for multiple videos.
-   *
-   * @param {Array<string>} urlsOrIds List of video URLs or video ids.
-   */
-  public async video(urlsOrIds: Array<string>): Promise<Array<VideoResult>>;
-  public async video(urlsOrIds: string | Array<string>): Promise<VideoResult | Array<VideoResult>> {
-    let videoIds = [];
-    if (typeof urlsOrIds === 'string') {
-      videoIds = [extractVideoId(urlsOrIds) || urlsOrIds];
-    } else {
-      videoIds = urlsOrIds.map(id => extractVideoId(id) || id).filter(x => !!x);
-    }
+  log(`Querying for ${videoIds.length} videos...`);
 
-    if (videoIds.length === 0) {
-      return Promise.reject(`No valid video URLs were found!`);
-    }
+  const results = await pMap(videoIds, id => query(id), { concurrency });
 
-    log(`Converting ${videoIds.length} video URLs to video Ids...`);
-
-    const results = await this._scraper.videos(videoIds);
-
-    if (typeof urlsOrIds === 'string') {
-      return results[0];
-    } else {
-      return results;
-    }
+  if (typeof urlsOrIds === 'string') {
+    return results[0];
+  } else {
+    return results;
   }
 }

@@ -1,44 +1,9 @@
-import { test } from 'ava';
+import { test, TestContext } from 'ava';
 
-import { Scany } from './';
+import { scanFeed, scanVideo, VideoResult } from './';
 
-test('e2e - Scany#video gets video info', async (t) => {
-    let scany = new Scany();
-    const result = await scany.video('DEVi0mEaJJQ');
-
-    t.truthy(result.videoTitle);
-    t.truthy(result.videoId);
-    t.truthy(result.videoUrl);
-    t.truthy(result.channelName);
-    t.truthy(result.channelId);
-    t.truthy(result.channelUrl);
-    t.truthy(result.description);
-    t.true(result.published instanceof Date);
-    t.true(result.lastScanned instanceof Date);
-    t.is(typeof result.views, 'number');
-});
-
-test('e2e - Scany#videos gets multiple videos info', async (t) => {
-    let scany = new Scany();
-    const results = await scany.video(['https://youtube.com/watch?v=OFbBs9M0cqw', 'beaHxW5o-uw']);
-
-    results.forEach(result => {
-        t.truthy(result.videoTitle);
-        t.truthy(result.videoId);
-        t.truthy(result.videoUrl);
-        t.truthy(result.channelName);
-        t.truthy(result.channelId);
-        t.truthy(result.channelUrl);
-        t.truthy(result.description);
-        t.true(result.published instanceof Date);
-        t.true(result.lastScanned instanceof Date);
-        t.is(typeof result.views, 'number');
-    });
-});
-
-test('e2e - Scany#playlist gets playlist info', async (t) => {
-    let scany = new Scany();
-    const result = await scany.feed('https://youtube.com/playlist?list=PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
+async function asProperFeedVia(t: TestContext, url: string) {
+    const result = await scanFeed(url);
 
     t.truthy(result.channelName);
     t.truthy(result.channelId);
@@ -49,18 +14,41 @@ test('e2e - Scany#playlist gets playlist info', async (t) => {
     t.true(result.lastScanned instanceof Date);
     t.true(result.videos.length > 0);
 
-    result.videos.forEach(video => t.truthy(video.videoId));
-});
+    validateVideo(t, result.videos);
+}
+asProperFeedVia.title = (providedTitle: string) => `queryFeed gets feed by ${providedTitle}`;
 
-test('e2e - Scany#channel gets channel info', async (t) => {
-    let scany = new Scany();
-    const result = await scany.feed('https://youtube.com/channel/UC6107grRI4m0o2-emgoDnAA');
+function validateVideo(t: TestContext, videos: VideoResult[]) {
+    for(let video of videos) {
+        t.truthy(video.videoTitle);
+        t.truthy(video.videoId);
+        t.truthy(video.videoUrl);
+        t.truthy(video.channelName);
+        t.truthy(video.channelId);
+        t.truthy(video.channelUrl);
+        t.truthy(video.thumbnails.high);
+        t.is(typeof video.views, 'number');
+        t.true(video.views > 0);
+        t.true(video.lastScanned instanceof Date);
+    }
+}
 
-    t.truthy(result.channelName);
-    t.truthy(result.channelId);
-    t.truthy(result.channelUrl);
-    t.true(result.lastScanned instanceof Date);
-    t.true(result.videos.length > 0);
+async function asProperVideoVia(t: TestContext, url: string|string[]) {
+    if(typeof url === 'string') {
+        let video = await scanVideo(url);
+        validateVideo(t, [video]);
+    } else {
+        let videos = await scanVideo(url);
+        validateVideo(t, videos);
+    }
+}
+asProperVideoVia.title = (providedTitle: string) => `queryVideo gets video by ${providedTitle}`;
 
-    result.videos.forEach(video => t.truthy(video.videoId));
-});
+test('playlist URL', asProperFeedVia, 'https://youtube.com/playlist?list=PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
+test('channel url', asProperFeedVia, 'https://youtube.com/channel/UC6107grRI4m0o2-emgoDnAA');
+test('single video', asProperVideoVia, 'DEVi0mEaJJQ');
+test('video array', asProperVideoVia, ['https://youtube.com/watch?v=OFbBs9M0cqw', 'beaHxW5o-uw']);
+
+test(`Watch Later playlists not supported`, t => t.throws(scanFeed('https://www.youtube.com/playlist?list=WL')));
+test(`invalid video list not supported`, t => t.throws(scanVideo([])));
+test(`recommends video`, t => t.throws(scanFeed('https://youtube.com/watch?v=OFbBs9M0cqw')));
