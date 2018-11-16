@@ -49,6 +49,23 @@ test('channel url', asProperFeedVia, 'https://youtube.com/channel/UC6107grRI4m0o
 test('single video', asProperVideoVia, 'DEVi0mEaJJQ');
 test('video array', asProperVideoVia, ['https://youtube.com/watch?v=OFbBs9M0cqw', 'beaHxW5o-uw']);
 
+test('skips videos', async (t) => {
+    const { videos } = await scanFeed('https://youtube.com/channel/UC6107grRI4m0o2-emgoDnAA', { scanVideos: false });
+
+    for(let video of videos) {
+        t.truthy(video.videoTitle);
+        t.truthy(video.videoId);
+        t.truthy(video.videoUrl);
+        t.falsy(video.channelName);
+        t.falsy(video.channelId);
+        t.falsy(video.channelUrl);
+
+        t.falsy(video.thumbnails);
+        t.is(typeof video.views, 'undefined');
+        t.falsy(video.lastScanned);
+    }
+});
+
 test(`Watch Later playlists not supported`, t => t.throws(scanFeed('https://www.youtube.com/playlist?list=WL')));
 test(`invalid video list not supported`, t => t.throws(scanVideo([])));
-test(`recommends video`, t => t.throws(scanFeed('https://youtube.com/watch?v=OFbBs9M0cqw')));
+test(`recommends proper method if given wrong URL`, t => t.throws(scanFeed('https://youtube.com/watch?v=OFbBs9M0cqw')));

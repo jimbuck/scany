@@ -9,7 +9,13 @@ const DEFAULT_CHANNEL_LIMIT = 10;
 
 export { FeedResult, VideoResult, Thumbnails };
 
-export async function scanFeed(url: string, opts?: {limit?: number, concurrency?: number}): Promise<FeedResult> {
+export interface ScanyOptions {
+  limit?: number;
+  concurrency?: number;
+  scanVideos?: boolean;
+}
+
+export async function scanFeed(url: string, opts?: ScanyOptions): Promise<FeedResult> {
   const now = new Date();
 
   let videoId = extractVideoId(url);
@@ -20,15 +26,17 @@ export async function scanFeed(url: string, opts?: {limit?: number, concurrency?
     throw new Error('Watch Later playlists are not supported!');
   }
 
-  opts = Object.assign({
+  opts = Object.assign<ScanyOptions, ScanyOptions>({
     limit: playlistId ? Number.MAX_SAFE_INTEGER : DEFAULT_CHANNEL_LIMIT,
-    concurrency: DEFAULT_CONCURRENCY
+    concurrency: DEFAULT_CONCURRENCY,
+    scanVideos: true
   }, opts);
 
   log(`Querying feed '${url}'...`);
 
   const plResult = await ytpl(url, { limit: opts.limit });
-  return {
+
+  const result: FeedResult = {
     lastScanned: now,
     channelId: plResult.author.id,
     channelName: plResult.author.name,
@@ -36,24 +44,29 @@ export async function scanFeed(url: string, opts?: {limit?: number, concurrency?
     playlistId: plResult.id,
     playlistTitle: plResult.title,
     playlistUrl: plResult.url,
-    videos: await pMap(plResult.items, async (v) => {
-
-      const vidResult = await query(v.url_simple);
-      
-      // Hard delete bloated data (just use pully-core if it is needed)
-      delete vidResult.formats;
-      delete vidResult.raw;
-
-      return Object.assign({
+    videos: plResult.items.map(v => {
+      return {
         videoId: v.id,
         videoTitle: v.title,
-        videoUrl: v.url_simple,
-        channelName: v.author.name,
-        channelId: v.author.id,
-        channelUrl: v.author.channel_url,
-      } as VideoResult, vidResult);
-    }, { concurrency: opts.concurrency })
+        videoUrl: v.url_simple
+      } as VideoResult;
+    })
   };
+
+  if (opts.scanVideos) {
+    result.videos = await pMap(result.videos, async (video) => {
+
+      const videoResult = await query(video.videoUrl);
+      
+      // Hard delete bloated data (just use pully-core if it is needed)
+      delete videoResult.formats;
+      delete videoResult.raw;
+
+      return Object.assign(video, videoResult);
+    }, { concurrency: opts.concurrency })
+  }
+
+  return result;
 }
 
 /**

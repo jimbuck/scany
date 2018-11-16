@@ -10,13 +10,21 @@
 
 YouTube provides basic information on users, channels, and playlists via RSS feeds. This module makes it incredibly easy to access that data without requiring an API key! Not having to sign up for something new is great for hackathons and small projects.
 
+## Features
+
+- No configuration necessary!
+- Scrapes the web for channels/users/playlists and reads metadata directly from the video feeds.
+- Anonymous API, no OAuth key needed!
+- Automatically creates all available thumbnail URLs for easy use!
+- Complete, built-in typescript typings!
+
 ## Installation
 
 ```bash
 npm i scany
 ```
 
-## Example
+### Example
 
 ```ts
 import { scanFeed, scanVideo } from 'scany';
@@ -35,13 +43,57 @@ playlist.videos.forEach((video, i) => {
 
 ```
 
-## Features
+## API
 
-- No configuration necessary!
-- Scrapes the web for channels/users/playlists and reads meta data directly from the video feeds.
-- Anonymous API, no OAuth key needed!
-- Automatically creates all available thumbnail URLs for easy use!
-- Complete, built-in typescript typings!
+### Methods
+
+#### scanFeed(url, [options])
+
+Returns a Promise for a [`FeedResult` object](#FeedResult).
+
+##### url
+
+Type: `String`
+
+The URL to a Youtube channel or playlist. If the URL is a channel it will return the feed of the default "Uploads" playlist.
+
+##### options
+
+Type: `Object`
+
+ - `limit`: `Number` - Limit the number of videos retrieved from the feed URL. Defaults to all (`MAX_SAFE_INTEGER`) for playlists and `10` for channel urls (recent uploads).
+ - `scanVideos`: `Boolean` - Toggles the retrieval of extra metadata for each video. Defaults to `true`.
+ - `concurrency`: `Number` - Maximum number of videos to query at once. Defaults to `8`. Ignored if `scanVideos` is false.
+
+#### scanVideo(url, [concurrency])
+
+Returns a Promise for one or more [`VideoResult` objects](#VideoResult).
+
+##### url
+
+Type: `String` `String[]`
+
+The URL or array of URLs to a Youtube video.
+
+##### concurrency
+
+Type: `Number`
+
+Maximum number of videos to query at once. Defaults to `8`.
+
+### Models
+
+#### FeedResult
+
+Type: `Object`
+
+ - _TODO_
+
+#### VideoResult
+
+Type: `Object`
+
+ - _TODO_
 
 ## Related
 
