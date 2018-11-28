@@ -1,6 +1,6 @@
 import { test, TestContext } from 'ava';
 
-import { scanFeed, scanVideo, VideoResult } from './';
+import { scanFeed, scanVideo, findFeed, VideoResult } from './';
 
 async function asProperFeedVia(t: TestContext, url: string) {
     const result = await scanFeed(url);
@@ -44,10 +44,30 @@ async function asProperVideoVia(t: TestContext, url: string|string[]) {
 }
 asProperVideoVia.title = (providedTitle: string) => `queryVideo gets video by ${providedTitle}`;
 
+async function findsCorrectPlaylist(t: TestContext, video: VideoResult, expectedPlaylistId: string) {
+    const feed = await findFeed(video);
+    t.is(feed.playlistId, expectedPlaylistId);
+}
+findsCorrectPlaylist.title = (providedTitle: string) => `finds correct playlist for ${providedTitle}`;
+
 test('playlist URL', asProperFeedVia, 'https://youtube.com/playlist?list=PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
 test('channel url', asProperFeedVia, 'https://youtube.com/channel/UC6107grRI4m0o2-emgoDnAA');
 test('single video', asProperVideoVia, 'DEVi0mEaJJQ');
 test('video array', asProperVideoVia, ['https://youtube.com/watch?v=OFbBs9M0cqw', 'beaHxW5o-uw']);
+
+test('video 1/3', findsCorrectPlaylist, {
+    videoTitle: `Tom's Terrific Trip | Shot in 4K`,
+    videoUrl:'https://www.youtube.com/watch?v=NEZ06xitrzI',
+    channelName: 'Bradley Friesen'
+}, 'PLRJGGcGGYxmqzFSXP7gAdJVrG7uBfwxMX');
+
+test('video 2/3', findsCorrectPlaylist, {
+    videoTitle: `How Lawn Mower Blades Cut Grass (at 50,000 FRAMES PER SECOND) - Smarter Every Day 196`,
+    videoUrl:'https://www.youtube.com/watch?v=-GlJFVTzEsI',
+    channelName: 'SmarterEveryDay'
+}, 'PLjHf9jaFs8XUXBnlkBAuRkOpUJosxJ0Vx');
+
+test(`finds playlist throws for video 3/3`, t => t.throws(findFeed({videoTitle:'4K Video Relaxing Ultra HD TV Test 2160p 20 minutes', channelName: '4K Play'} as any)));
 
 test('skips videos', async (t) => {
     const { videos } = await scanFeed('https://youtube.com/channel/UC6107grRI4m0o2-emgoDnAA', { scanVideos: false });
@@ -69,3 +89,4 @@ test('skips videos', async (t) => {
 test(`Watch Later playlists not supported`, t => t.throws(scanFeed('https://www.youtube.com/playlist?list=WL')));
 test(`invalid video list not supported`, t => t.throws(scanVideo([])));
 test(`recommends proper method if given wrong URL`, t => t.throws(scanFeed('https://youtube.com/watch?v=OFbBs9M0cqw')));
+

@@ -81,6 +81,12 @@ Type: `Number`
 
 Maximum number of videos to query at once. Defaults to `8`.
 
+#### findFeed(video, [options])
+
+Finds a playlist based on the provided video title/channel.
+
+ - _TODO_
+
 ### Models
 
 #### FeedResult
