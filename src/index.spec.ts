@@ -86,6 +86,12 @@ test('skips videos', async (t) => {
     }
 });
 
+test(`Uses channel name for playlistTitle when given channel url`, async (t) => {
+    const feed = await scanFeed('https://youtube.com/channel/UC6107grRI4m0o2-emgoDnAA', { scanVideos: false });
+
+    t.is(feed.playlistTitle, feed.channelName);
+});
+
 test(`Watch Later playlists not supported`, t => t.throws(scanFeed('https://www.youtube.com/playlist?list=WL')));
 test(`invalid video list not supported`, t => t.throws(scanVideo([])));
 test(`recommends proper method if given wrong URL`, t => t.throws(scanFeed('https://youtube.com/watch?v=OFbBs9M0cqw')));

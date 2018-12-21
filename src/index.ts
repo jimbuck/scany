@@ -8,6 +8,14 @@ const log = debug('scany');
 const DEFAULT_CONCURRENCY = 8;
 const DEFAULT_CHANNEL_LIMIT = 10;
 
+async function lookupPlaylist(id: string, opts: ytpl.options) {
+  try {
+    return await ytpl(id, opts);
+  } catch (err) {
+    return Promise.reject(err);
+  }
+}
+
 export { FeedResult, VideoResult, Thumbnails };
 
 export interface ScanyOptions {
@@ -35,7 +43,7 @@ export async function scanFeed(url: string, opts?: ScanyOptions): Promise<FeedRe
 
   log(`Querying feed '${url}'...`);
 
-  const plResult = await ytpl(url, { limit: opts.limit });
+  const plResult = await lookupPlaylist(url, { limit: opts.limit });
 
   const result: FeedResult = {
     lastScanned: now,
@@ -53,6 +61,10 @@ export async function scanFeed(url: string, opts?: ScanyOptions): Promise<FeedRe
       } as VideoResult;
     })
   };
+
+  if (isChannelUploadsPlaylist(result)) {
+    result.playlistTitle = result.channelName;
+  }
 
   if (opts.scanVideos) {
     result.videos = await pMap(result.videos, async (video) => {
@@ -131,4 +143,8 @@ function _findPlaylist(videoTitle: string, channelName: string): Promise<string>
         });
     });
   });
+}
+
+function isChannelUploadsPlaylist(feed: FeedResult) {
+  return feed.channelId.slice(2) === feed.playlistId.slice(2);
 }
