@@ -96,3 +96,4 @@ test(`Watch Later playlists not supported`, t => t.throws(scanFeed('https://www.
 test(`invalid video list not supported`, t => t.throws(scanVideo([])));
 test(`recommends proper method if given wrong URL`, t => t.throws(scanFeed('https://youtube.com/watch?v=OFbBs9M0cqw')));
 
+test(`Failed playlist lookup logs and returns rejected promise`, t => t.throws(scanFeed('https://www.youtube.com/playlist?list=PLBUCKBUCKBUCKBUCKBUCKBUCKBUCKBUCK')));
