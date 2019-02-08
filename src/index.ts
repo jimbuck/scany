@@ -12,6 +12,10 @@ async function lookupPlaylist(id: string, opts: ytpl.options) {
   try {
     return await ytpl(id, opts);
   } catch (err) {
+    log(`'ytpl' failed to find playlist: ${err}
+${err.stack}
+
+  ${id} -> ${JSON.stringify(opts)}`);
     return Promise.reject(err);
   }
 }
